@@ -1,0 +1,2380 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>الهلال - إدارة الأجهزة الطبية</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;900&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --primary: #1a56db;
+  --primary-dark: #1341a8;
+  --primary-light: #ebf3ff;
+  --success: #057a55;
+  --success-light: #def7ec;
+  --danger: #c81e1e;
+  --danger-light: #fde8e8;
+  --warning: #9f580a;
+  --warning-light: #fdf6b2;
+  --muted-color: #64748b;
+  --bg: #f0f4f8;
+  --surface: #fff;
+  --surface2: #f8fafc;
+  --border: #e2e8f0;
+  --text: #1e293b;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --shadow: 0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.04);
+  --shadow-lg: 0 10px 25px rgba(0,0,0,.1);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;direction:rtl;font-size:14px}
+
+/* HEADER */
+header{background:var(--primary);color:#fff;padding:0 20px;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(26,86,219,.3)}
+.hdr{max-width:1280px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:58px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-icon{width:36px;height:36px;background:rgba(255,255,255,.15);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px}
+.logo-name{font-size:16px;font-weight:900}
+.logo-sub{font-size:10px;opacity:.8}
+.hdr-stats{display:flex;gap:20px}
+.hdr-stat{text-align:center}
+.hdr-stat-num{font-size:20px;font-weight:900;line-height:1}
+.hdr-stat-lbl{font-size:10px;opacity:.75;margin-top:2px}
+@media(max-width:640px){.hdr-stats{display:none}}
+
+/* SYNC */
+.sync-bar{background:#1e40af;padding:5px 20px;display:flex;align-items:center;justify-content:space-between;font-size:11px;color:rgba(255,255,255,.85)}
+.sync-dot{width:7px;height:7px;border-radius:50%;background:#34d399;display:inline-block;margin-left:6px;animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* NAV */
+nav{background:var(--surface);border-bottom:1px solid var(--border);padding:0 20px;position:sticky;top:58px;z-index:99;box-shadow:var(--shadow)}
+.nav-inner{max-width:1280px;margin:0 auto;display:flex;overflow-x:auto;scrollbar-width:none}
+.nav-inner::-webkit-scrollbar{display:none}
+.nav-btn{padding:13px 16px;background:none;border:none;border-bottom:3px solid transparent;color:var(--muted-color);font-family:'Cairo',sans-serif;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:6px;transition:all .15s}
+.nav-btn:hover{color:var(--text)}
+.nav-btn.active{color:var(--primary);border-bottom-color:var(--primary)}
+.nav-badge{background:var(--danger);color:#fff;font-size:10px;padding:2px 7px;border-radius:20px;font-weight:700}
+
+/* MAIN */
+main{max-width:1280px;margin:0 auto;padding:20px}
+.section{display:none}
+.section.active{display:block}
+
+/* CARDS */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+.card-hdr{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--surface2)}
+.card-title{font-size:14px;font-weight:700;display:flex;align-items:center;gap:7px}
+.card-body{padding:18px}
+
+/* STAT CARDS */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+@media(max-width:640px){.stats-grid{grid-template-columns:repeat(2,1fr)}}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow);display:flex;align-items:center;gap:14px;transition:transform .2s,box-shadow .2s;position:relative;overflow:hidden}
+.stat-card::before{content:'';position:absolute;top:0;right:0;width:4px;height:100%}
+.stat-card.blue::before{background:var(--primary)}
+.stat-card.red::before{background:var(--danger)}
+.stat-card.green::before{background:var(--success)}
+.stat-card.yellow::before{background:#9f580a}
+.stat-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg)}
+.stat-icon{width:48px;height:48px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.stat-icon.blue{background:var(--primary-light)}
+.stat-icon.red{background:var(--danger-light)}
+.stat-icon.green{background:var(--success-light)}
+.stat-icon.yellow{background:var(--warning-light)}
+.stat-num{font-size:28px;font-weight:900;line-height:1}
+.stat-num.blue{color:var(--primary)}
+.stat-num.red{color:var(--danger)}
+.stat-num.green{color:var(--success)}
+.stat-num.yellow{color:var(--warning)}
+.stat-lbl{font-size:12px;color:var(--muted-color);margin-top:4px}
+
+/* DASH GRID */
+.dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:640px){.dash-grid{grid-template-columns:1fr}}
+
+/* TABLE */
+.tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{background:var(--surface2);padding:10px 14px;text-align:right;color:var(--muted-color);font-weight:700;font-size:11px;border-bottom:1px solid var(--border);white-space:nowrap;text-transform:uppercase;letter-spacing:.3px}
+td{padding:12px 14px;border-bottom:1px solid var(--border);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#f8fafc}
+tr.selected td{background:#dbeafe !important}
+tr.selected{outline:2px solid var(--primary)}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap}
+.badge-green{background:var(--success-light);color:var(--success)}
+.badge-red{background:var(--danger-light);color:var(--danger)}
+.badge-yellow{background:var(--warning-light);color:var(--warning)}
+.badge-orange{background:#fef3c7;color:#c27803}
+.badge-blue{background:var(--primary-light);color:var(--primary)}
+.badge-gray{background:#f1f5f9;color:var(--muted-color)}
+
+/* BUTTONS */
+.btn{padding:8px 16px;border-radius:var(--radius-sm);border:none;font-family:'Cairo',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:6px}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-primary:hover{background:var(--primary-dark);transform:translateY(-1px)}
+.btn-ghost{background:var(--surface2);color:var(--text);border:1px solid var(--border)}
+.btn-ghost:hover{border-color:var(--primary);color:var(--primary)}
+.btn-danger{background:var(--danger-light);color:var(--danger);border:1px solid #fecaca}
+.btn-danger:hover{background:#fecaca}
+.btn-sm{padding:5px 11px;font-size:12px}
+.btn-white{background:#fff;color:var(--primary);border:none;padding:7px 14px;border-radius:var(--radius-sm);font-family:'Cairo',sans-serif;font-size:13px;font-weight:700;cursor:pointer}
+.btn-white-danger{background:var(--danger-light);color:var(--danger);border:none;padding:7px 14px;border-radius:var(--radius-sm);font-family:'Cairo',sans-serif;font-size:13px;font-weight:700;cursor:pointer}
+
+/* PAGE HDR */
+.page-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px}
+.page-title{font-size:20px;font-weight:900}
+.btn-group{display:flex;gap:8px;flex-wrap:wrap}
+
+/* FILTERS */
+.filters{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;align-items:center}
+.search-box{flex:1;min-width:180px;padding:8px 13px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);font-family:'Cairo',sans-serif;font-size:13px;color:var(--text)}
+.search-box:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(26,86,219,.1)}
+.filter-sel{padding:8px 11px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);font-family:'Cairo',sans-serif;font-size:13px;color:var(--text);cursor:pointer}
+
+/* TABS */
+.tabs{display:flex;gap:4px;border-bottom:2px solid var(--border);margin-bottom:16px}
+.tab-btn{padding:10px 18px;border:none;background:none;font-family:'Cairo',sans-serif;font-size:13px;font-weight:700;cursor:pointer;color:var(--muted-color);border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .15s;display:flex;align-items:center;gap:7px}
+.tab-btn.active{color:var(--primary);border-bottom-color:var(--primary)}
+.tab-count{font-size:11px;padding:2px 7px;border-radius:20px;font-weight:700;color:#fff}
+.tab-count.red{background:var(--danger)}
+.tab-count.green{background:var(--success)}
+.tab-count.gray{background:var(--muted-color)}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,.5);backdrop-filter:blur(4px);z-index:1000;display:none;align-items:center;justify-content:center;padding:16px}
+.modal-overlay.open{display:flex}
+.modal{background:var(--surface);border-radius:var(--radius);width:100%;max-width:580px;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow-lg);animation:slideUp .25s ease}
+@keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-hdr{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--surface2)}
+.modal-title{font-size:16px;font-weight:900}
+.modal-close{background:none;border:none;font-size:18px;cursor:pointer;color:var(--muted-color);padding:4px}
+.modal-close:hover{color:var(--danger)}
+.modal-body{padding:22px}
+.modal-footer{padding:14px 22px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end;background:var(--surface2)}
+
+/* FORM */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:480px){.form-grid{grid-template-columns:1fr}}
+.form-group{display:flex;flex-direction:column;gap:6px}
+.form-group.full{grid-column:1/-1}
+label{font-size:11px;font-weight:700;color:var(--muted-color);text-transform:uppercase;letter-spacing:.3px}
+input,select,textarea{padding:9px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);font-family:'Cairo',sans-serif;font-size:13px;color:var(--text);direction:rtl;transition:border-color .15s;width:100%}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(26,86,219,.1);background:#fff}
+textarea{resize:vertical;min-height:75px}
+select option{background:#fff}
+
+/* DEVICE CARDS */
+.device-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.device-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);transition:all .2s;cursor:default}
+.device-card:hover{box-shadow:var(--shadow-lg);transform:translateY(-2px)}
+.device-card.selected{border-color:var(--primary);background:var(--primary-light)}
+.device-name{font-size:14px;font-weight:700}
+.device-brand{font-size:11px;color:var(--muted-color);margin-top:2px}
+.device-info{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
+.di-label{font-size:10px;color:var(--muted-color);margin-bottom:2px;text-transform:uppercase;letter-spacing:.2px}
+.di-val{font-size:11px;font-weight:600;font-family:'IBM Plex Mono',monospace}
+
+/* ROUNDS */
+.round-sect{margin-bottom:14px}
+.round-sect-hdr{background:var(--primary);color:#fff;padding:9px 14px;border-radius:var(--radius-sm) var(--radius-sm) 0 0;font-weight:700;font-size:13px;display:flex;justify-content:space-between;align-items:center}
+.round-tbl-wrap{border:1px solid var(--border);border-top:none;border-radius:0 0 var(--radius-sm) var(--radius-sm);overflow-x:auto;-webkit-overflow-scrolling:touch}
+
+/* BULK BAR */
+.bulk-bar{display:none;position:sticky;bottom:14px;z-index:50;background:var(--primary);color:#fff;border-radius:var(--radius);padding:11px 18px;margin-top:10px;align-items:center;justify-content:space-between;box-shadow:var(--shadow-lg)}
+.bulk-bar.show{display:flex}
+
+/* TOAST */
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(80px);padding:11px 22px;border-radius:var(--radius);font-weight:700;font-size:13px;z-index:9999;transition:transform .3s ease;box-shadow:var(--shadow-lg);white-space:nowrap}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.toast-success{background:var(--success);color:#fff}
+.toast-error{background:var(--danger);color:#fff}
+
+/* EMPTY / LOADING */
+.empty{text-align:center;padding:40px;color:var(--muted-color)}
+.empty-icon{font-size:38px;margin-bottom:10px;opacity:.6}
+.empty-text{font-size:14px}
+.loading{text-align:center;padding:36px;color:var(--muted-color)}
+.spinner{width:30px;height:30px;border:3px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 10px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* PRINT */
+@media print {
+  @page{margin:8mm;size:A4}
+  html,body{margin:0!important;padding:0!important;height:auto!important}
+  body>*{display:none!important}
+  body>#print-report{display:block!important}
+  #print-report{font-family:Cairo,sans-serif;direction:rtl;color:#000;font-size:10px;padding:0;margin:0}
+  .p-hdr{display:flex;flex-direction:row-reverse;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #000;padding-bottom:8px;margin-bottom:12px}
+  .p-org{font-size:10px;line-height:1.7;text-align:right}
+  .p-titles{text-align:left}
+  .p-title{font-size:17px;font-weight:900;text-align:left}
+  .p-date{font-size:11px;color:#555;margin-top:3px;text-align:left}
+  .p-table{width:100%;border-collapse:collapse;font-size:9px;margin-bottom:10px;border:1px solid #666}
+  .p-table th{background:#e8e8e8;border:1px solid #666;padding:4px 6px;font-weight:700;font-size:9px;text-align:right;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .p-table td{border:1px solid #ccc;padding:3px 6px;text-align:right}
+  .p-table tr:last-child td{border-bottom:1px solid #666}
+  .p-table tr:nth-child(even) td{background:#f8f8f8;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .p-week-table{width:100%;border-collapse:collapse;font-size:8px;border:1px solid #666}
+  .p-week-table{width:100%;border-collapse:collapse;font-size:7px}
+  .p-week-table th{background:#1a56db;color:#fff;border:1px solid #666;padding:2px 2px;text-align:center;-webkit-print-color-adjust:exact;print-color-adjust:exact;font-size:7px}
+  .p-week-table td{border:1px solid #ccc;padding:2px 2px;text-align:center;font-size:7px}
+  .p-week-table .dept-hdr{background:#e8f0ff;font-weight:700;text-align:right;padding:2px 5px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .p-week-table .dev-name{text-align:right;font-weight:600;font-size:7px}
+  .p-sigs{display:flex;justify-content:space-around;margin-top:40px;border-top:1px solid #ccc;padding-top:16px}
+  .p-sig{text-align:center}
+  .p-sig-title{font-size:11px;font-weight:700;margin-bottom:50px}
+  .chk-good{color:#057a55;font-weight:900}
+  .chk-bad{color:#c81e1e;font-weight:900}
+  .p-legend{font-size:9px;color:#666;margin-top:6px}
+}
+#print-report{display:none}
+
+/* FACILITY SELECTION */
+#facility-screen {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(135deg, #1a56db 0%, #1341a8 100%);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.facility-card {
+  background: white;
+  border-radius: 20px;
+  padding: 32px;
+  width: 100%;
+  max-width: 440px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.2);
+  text-align: center;
+}
+
+.facility-logo {
+  font-size: 48px;
+  margin-bottom: 8px;
+}
+
+.facility-header {
+  font-size: 22px;
+  font-weight: 900;
+  color: #1e293b;
+  margin-bottom: 4px;
+}
+
+.facility-sub {
+  font-size: 13px;
+  color: #64748b;
+  margin-bottom: 28px;
+}
+
+.facility-btn {
+  display: block;
+  width: 100%;
+  padding: 16px;
+  border-radius: 12px;
+  border: 2px solid #e2e8f0;
+  background: white;
+  font-family: Cairo, sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all .2s;
+  margin-bottom: 12px;
+  text-align: right;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.facility-btn:hover {
+  border-color: #1a56db;
+  background: #ebf3ff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(26,86,219,.15);
+}
+
+.facility-btn-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+
+.facility-btn-icon.blue { background: #ebf3ff; }
+.facility-btn-icon.green { background: #def7ec; }
+
+.facility-btn-name { font-size: 15px; font-weight: 900; color: #1e293b; }
+.facility-btn-desc { font-size: 11px; color: #64748b; margin-top: 2px; }
+</style>
+</head>
+<body>
+
+<!-- FACILITY SELECTION SCREEN -->
+<div id="facility-screen">
+  <div class="facility-card">
+    <div class="facility-logo">🏥</div>
+    <div class="facility-header">نظام إدارة الأجهزة الطبية</div>
+    <div class="facility-sub">اختار المنشأة للمتابعة</div>
+
+    <button class="facility-btn" onclick="selectFacility('helal')">
+      <div class="facility-btn-icon blue">🏥</div>
+      <div>
+        <div class="facility-btn-name">مستشفى الهلال</div>
+        <div class="facility-btn-desc">الهيئة العامة للتأمين الصحي فرع دمياط</div>
+      </div>
+    </button>
+
+    <button class="facility-btn" onclick="selectFacility('talaba')">
+      <div class="facility-btn-icon green">🏫</div>
+      <div>
+        <div class="facility-btn-name">عيادة الطلبة الشاملة</div>
+        <div class="facility-btn-desc">الهيئة العامة للتأمين الصحي فرع دمياط</div>
+      </div>
+    </button>
+  </div>
+</div>
+
+<header>
+  <div class="hdr">
+    <div class="logo">
+      <div class="logo-icon">🏥</div>
+      <div>
+        <div class="logo-name">مستشفى الهلال</div>
+        <div class="logo-sub">نظام إدارة الأجهزة الطبية</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px">
+      <button id="switch-facility-btn" onclick="switchFacility()" style="display:none;background:rgba(255,255,255,.15);color:white;border:none;padding:7px 14px;border-radius:8px;font-family:Cairo,sans-serif;font-size:12px;font-weight:700;cursor:pointer;align-items:center;gap:6px">🔄 تغيير المنشأة</button>
+    </div>
+    <div class="hdr-stats">
+      <div class="hdr-stat"><div class="hdr-stat-num" id="hdr-devices">-</div><div class="hdr-stat-lbl">الأجهزة</div></div>
+      <div class="hdr-stat"><div class="hdr-stat-num" id="hdr-broken">-</div><div class="hdr-stat-lbl">معطلة</div></div>
+      <div class="hdr-stat"><div class="hdr-stat-num" id="hdr-rounds">-</div><div class="hdr-stat-lbl">مرور اليوم</div></div>
+    </div>
+  </div>
+</header>
+
+<div class="sync-bar">
+  <div><span class="sync-dot"></span> متصل بـ Supabase — البيانات مشتركة مع الفريق</div>
+  <div id="last-sync" style="font-size:11px;opacity:.7"></div>
+</div>
+
+<nav>
+  <div class="nav-inner">
+    <button class="nav-btn active" onclick="showSection('dashboard')">📊 الرئيسية</button>
+    <button class="nav-btn" onclick="showSection('maintenance')">🔧 الصيانات والأعطال <span class="nav-badge" id="badge-maint">0</span></button>
+    <button class="nav-btn" onclick="showSection('rounds')">📋 المرور اليومي</button>
+    <button class="nav-btn" onclick="showSection('invoices')">🧾 الفواتير</button>
+    <button class="nav-btn" onclick="showSection('devices')">⚙️ سجل الأجهزة</button>
+    <button class="nav-btn" onclick="manageTechs()">👷 الفنيين</button>
+    <button class="nav-btn" onclick="manageDepts()">🏢 الأقسام</button>
+  </div>
+</nav>
+
+<main>
+
+<!-- DASHBOARD -->
+<div id="section-dashboard" class="section active">
+  <div class="stats-grid">
+    <div class="stat-card blue"><div class="stat-icon blue">⚙️</div><div><div class="stat-num blue" id="stat-total">-</div><div class="stat-lbl">إجمالي الأجهزة</div></div></div>
+    <div class="stat-card red"><div class="stat-icon red">🔴</div><div><div class="stat-num red" id="stat-broken">-</div><div class="stat-lbl">معطلة حالياً</div></div></div>
+    <div class="stat-card green"><div class="stat-icon green">✅</div><div><div class="stat-num green" id="stat-fixed">-</div><div class="stat-lbl">تم الإصلاح هذا الشهر</div></div></div>
+    <div class="stat-card yellow"><div class="stat-icon yellow">📋</div><div><div class="stat-num yellow" id="stat-rounds-today">-</div><div class="stat-lbl">مرور اليوم</div></div></div>
+  </div>
+  <div class="dash-grid">
+    <div class="card">
+      <div class="card-hdr"><div class="card-title">🔧 آخر الصيانات</div><button class="btn btn-ghost btn-sm" onclick="showSection('maintenance')">عرض الكل</button></div>
+      <div id="dash-maint"><div class="loading"><div class="spinner"></div></div></div>
+    </div>
+    <div class="card">
+      <div class="card-hdr"><div class="card-title">📋 مرور اليوم</div><button class="btn btn-ghost btn-sm" onclick="showSection('rounds')">عرض الكل</button></div>
+      <div id="dash-rounds"><div class="loading"><div class="spinner"></div></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- MAINTENANCE -->
+<div id="section-maintenance" class="section">
+  <div class="page-hdr">
+    <div class="page-title">🔧 سجل الصيانات والأعطال</div>
+    <div class="btn-group">
+      <button class="btn btn-ghost" onclick="openMaintPrint()">🖨️ طباعة</button>
+      <button class="btn btn-primary" onclick="openModal('modal-maint')">+ بلاغ جديد</button>
+    </div>
+  </div>
+
+  <!-- Print picker -->
+  <div class="card" id="maint-print-card" style="margin-bottom:14px;display:none">
+    <div class="card-hdr">
+      <div class="card-title">🖨️ اختار فترة الطباعة</div>
+      <button class="btn btn-ghost btn-sm" onclick="document.getElementById('maint-print-card').style.display='none'">✕</button>
+    </div>
+    <div class="card-body" style="display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end">
+      <div class="form-group"><label>من تاريخ</label><input type="date" id="maint-from"></div>
+      <div class="form-group"><label>إلى تاريخ</label><input type="date" id="maint-to"></div>
+      <button class="btn btn-primary" onclick="printMaint()">🖨️ طباعة</button>
+    </div>
+  </div>
+
+  <div class="tabs" style="flex-wrap:wrap">
+    <button class="tab-btn active" id="tab-broken" onclick="switchMaintTab('broken')">🔴 معطلة <span class="tab-count red" id="cnt-broken">0</span></button>
+    <button class="tab-btn" id="tab-fixed" onclick="switchMaintTab('fixed')">✅ تم الإصلاح <span class="tab-count green" id="cnt-fixed">0</span></button>
+    <button class="tab-btn" id="tab-periodic" onclick="switchMaintTab('periodic')">🔧 صيانة دورية <span class="tab-count gray" id="cnt-periodic">0</span></button>
+    <button class="tab-btn" id="tab-install" onclick="switchMaintTab('install')">🆕 تركيب جديد <span class="tab-count gray" id="cnt-install">0</span></button>
+    <button class="tab-btn" id="tab-all-maint" onclick="switchMaintTab('all')">📋 الكل <span class="tab-count gray" id="cnt-all">0</span></button>
+  </div>
+
+  <div class="filters">
+    <input type="text" class="search-box" placeholder="🔍 بحث بالجهاز أو الإجراء..." oninput="filterMaint(this.value)">
+    <select class="filter-sel" onchange="filterMaintDept(this.value)">
+      <option value="">كل الأقسام</option>
+      <option>العمليات</option><option>التعقيم</option><option>العناية</option>
+      <option>الداخلي</option><option>الأشعة</option><option>المعمل</option>
+    </select>
+  </div>
+
+  <div class="card">
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th><th>نوع الصيانة</th><th>الجهاز</th><th>القسم</th>
+            <th>الإجراء المتخذ</th><th>الحالة</th><th>تاريخ العطل</th><th>تاريخ الإصلاح</th><th>إجراءات</th>
+          </tr>
+        </thead>
+        <tbody id="maint-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="bulk-bar" id="bulk-bar-maint">
+    <span id="bulk-maint-count" style="font-weight:700">0 محدد</span>
+    <div style="display:flex;gap:8px">
+      <button class="btn-white" onclick="cancelSel('maint')">إلغاء</button>
+      <button class="btn-white-danger" onclick="bulkDel('maint')">🗑 حذف</button>
+    </div>
+  </div>
+</div>
+
+<!-- ROUNDS -->
+<div id="section-rounds" class="section">
+  <div class="page-hdr">
+    <div class="page-title">📋 المرور اليومي</div>
+    <button class="btn btn-primary" onclick="toggleRoundsForm()">📝 تسجيل مرور</button>
+  </div>
+
+  <!-- Rounds form -->
+  <div id="rounds-form" style="display:none;margin-bottom:14px">
+    <div class="card">
+      <div class="card-hdr">
+        <div class="card-title">📝 تسجيل مرور</div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <select class="filter-sel" id="bulk-dept" onchange="renderBulkDevices()">
+            <option value="العمليات">العمليات</option><option value="التعقيم">التعقيم</option>
+            <option value="العناية">العناية</option><option value="الداخلي">الداخلي</option>
+            <option value="الأشعة">الأشعة</option><option value="المعمل">المعمل</option>
+          </select>
+          <input type="date" id="bulk-date" style="padding:7px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:Cairo,sans-serif;font-size:13px">
+          <select id="bulk-tech" style="padding:7px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:Cairo,sans-serif;font-size:13px"></select>
+          <button class="btn btn-ghost btn-sm" onclick="addTechInline('bulk-tech')">+</button>
+          <button class="btn btn-ghost btn-sm" onclick="toggleRoundsForm()">✕</button>
+        </div>
+      </div>
+      <div class="card-body" id="bulk-devices-list"></div>
+      <div style="padding:14px 18px;border-top:1px solid var(--border);text-align:left">
+        <button class="btn btn-primary" onclick="saveBulkRounds()">💾 حفظ</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- History -->
+  <div class="card">
+    <div class="card-hdr">
+      <div class="card-title">📋 سجل المرور</div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <select class="filter-sel" id="rounds-filter" onchange="onRoundsFilter(this.value)">
+          <option value="today">اليوم</option>
+          <option value="specific">يوم محدد</option>
+          <option value="week">هذا الأسبوع</option>
+          <option value="month">هذا الشهر</option>
+          <option value="">الكل</option>
+        </select>
+        <input type="date" id="rounds-specific" style="display:none;padding:7px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:Cairo,sans-serif;font-size:13px" onchange="loadRounds()">
+        <button class="btn btn-ghost btn-sm" onclick="openRoundsPrint()">🖨️ طباعة</button>
+      </div>
+    </div>
+    <div id="rounds-content"><div class="loading"><div class="spinner"></div></div></div>
+  </div>
+
+  <!-- Print picker -->
+  <div class="card" id="rounds-print-card" style="margin-top:14px;display:none">
+    <div class="card-hdr">
+      <div class="card-title">🖨️ اختار فترة الطباعة</div>
+      <button class="btn btn-ghost btn-sm" onclick="document.getElementById('rounds-print-card').style.display='none'">✕</button>
+    </div>
+    <div class="card-body" style="display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end">
+      <div class="form-group"><label>من تاريخ</label><input type="date" id="rounds-from"></div>
+      <div class="form-group"><label>إلى تاريخ</label><input type="date" id="rounds-to"></div>
+      <button class="btn btn-primary" onclick="printRounds()">🖨️ طباعة</button>
+    </div>
+  </div>
+
+  <div class="bulk-bar" id="bulk-bar-rounds">
+    <span id="bulk-rounds-count" style="font-weight:700">0 محدد</span>
+    <div style="display:flex;gap:8px">
+      <button class="btn-white" onclick="cancelSel('rounds')">إلغاء</button>
+      <button class="btn-white-danger" onclick="bulkDel('rounds')">🗑 حذف</button>
+    </div>
+  </div>
+</div>
+
+<!-- INVOICES -->
+<div id="section-invoices" class="section">
+  <div class="page-hdr">
+    <div class="page-title">🧾 متابعة الفواتير والشركات</div>
+    <div class="btn-group">
+      <button class="btn btn-ghost" onclick="printInvoices()">🖨️ طباعة</button>
+      <button class="btn btn-primary" onclick="openModal('modal-invoice')">+ فاتورة جديدة</button>
+    </div>
+  </div>
+  <div class="filters">
+    <input type="text" class="search-box" placeholder="🔍 بحث باسم الشركة أو رقم الفاتورة..." oninput="filterInvoices(this.value)">
+    <select class="filter-sel" onchange="filterInvoiceStatus(this.value)">
+      <option value="">كل الحالات</option>
+      <option>تم تسليمها للفرع</option>
+      <option>لم يتم تسليمها حتى الآن</option>
+      <option>تعلية</option>
+    </select>
+  </div>
+  <div class="card">
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>#</th><th>اسم الشركة</th><th>رقم الفاتورة</th><th>بيان الفاتورة</th><th>القيمة</th><th>الحالة</th><th>الفني</th><th>التاريخ</th><th>إجراءات</th></tr></thead>
+        <tbody id="inv-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+  <div class="bulk-bar" id="bulk-bar-invoices">
+    <span id="bulk-inv-count" style="font-weight:700">0 محدد</span>
+    <div style="display:flex;gap:8px">
+      <button class="btn-white" onclick="cancelSel('invoices')">إلغاء</button>
+      <button class="btn-white-danger" onclick="bulkDel('invoices')">🗑 حذف</button>
+    </div>
+  </div>
+</div>
+
+<!-- DEVICES -->
+<div id="section-devices" class="section">
+  <div class="page-hdr">
+    <div class="page-title">⚙️ سجل الأجهزة</div>
+    <div class="btn-group">
+      <button class="btn btn-ghost" onclick="printDevices()">🖨️ طباعة</button>
+      <button class="btn btn-primary" onclick="openModal('modal-device')">+ جهاز جديد</button>
+    </div>
+  </div>
+  <div class="filters">
+    <input type="text" class="search-box" placeholder="🔍 بحث بالاسم أو الماركة أو الرقم..." oninput="filterDevices(this.value)">
+    <select class="filter-sel" onchange="filterDeviceDept(this.value)">
+      <option value="">كل الأقسام</option>
+      <option>العمليات</option><option>التعقيم</option><option>العناية</option>
+      <option>الداخلي</option><option>الأشعة</option><option>المعمل</option>
+    </select>
+  </div>
+  <div id="devices-grid" class="device-grid"></div>
+  <div class="bulk-bar" id="bulk-bar-devices">
+    <span id="bulk-dev-count" style="font-weight:700">0 محدد</span>
+    <div style="display:flex;gap:8px">
+      <button class="btn-white" onclick="cancelSel('devices')">إلغاء</button>
+      <button class="btn-white-danger" onclick="bulkDel('devices')">🗑 حذف</button>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<!-- MODALS -->
+<!-- MAINT MODAL -->
+<div class="modal-overlay" id="modal-maint">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div class="modal-title" id="maint-modal-title">🔧 بلاغ صيانة جديد</div>
+      <button class="modal-close" onclick="closeModal('modal-maint')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="m-id">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>نوع الصيانة *</label>
+          <select id="m-type" onchange="toggleMaintDate(this.value)"><option>عطل مفاجئ</option><option>صيانة دورية</option><option>تركيب جهاز جديد</option><option>إصلاح</option></select>
+        </div>
+        <div class="form-group">
+          <label>القسم *</label>
+          <select id="m-dept" onchange="loadMaintDevices()">
+            <option>العمليات</option><option>التعقيم</option><option>العناية</option>
+            <option>الداخلي</option><option>الأشعة</option><option>المعمل</option>
+          </select>
+        </div>
+        <div class="form-group full">
+          <label>الجهاز *</label>
+          <select id="m-device"></select>
+        </div>
+        <div class="form-group full">
+          <label>الإجراء المتخذ *</label>
+          <textarea id="m-action" placeholder="اوصف الإجراء..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>حالة الجهاز *</label>
+          <select id="m-status" onchange="updateMaintDateFields()">
+            <option value="معطل">معطل</option>
+            <option value="يعمل بحالة جيدة">يعمل بحالة جيدة</option>
+            <option value="تحت الاختبار">تحت الاختبار</option>
+            <option value="ليس له استخدام">ليس له استخدام</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>الفني</label>
+          <div style="display:flex;gap:6px">
+            <select id="m-tech" style="flex:1"></select>
+            <button type="button" class="btn btn-ghost btn-sm" onclick="addTechInline('m-tech')">+</button>
+          </div>
+        </div>
+        <div class="form-group" id="m-date-group">
+          <label>تاريخ البلاغ</label>
+          <input type="date" id="m-date">
+        </div>
+        <div class="form-group" id="repair-date-group" style="display:none">
+          <label>تاريخ الإصلاح</label>
+          <input type="date" id="m-repair-date">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-maint')">إلغاء</button>
+      <button class="btn btn-primary" onclick="saveMaint()">💾 حفظ</button>
+    </div>
+  </div>
+</div>
+
+<!-- ROUND MODAL (single) -->
+<div class="modal-overlay" id="modal-round">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div class="modal-title">📋 تعديل مرور</div>
+      <button class="modal-close" onclick="closeModal('modal-round')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="r-id">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>القسم</label>
+          <select id="r-dept" onchange="loadRoundDevices()">
+            <option>العمليات</option><option>التعقيم</option><option>العناية</option>
+            <option>الداخلي</option><option>الأشعة</option><option>المعمل</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>الجهاز</label>
+          <select id="r-device"></select>
+        </div>
+        <div class="form-group">
+          <label>الحالة</label>
+          <select id="r-status"><option>يعمل بحالة جيدة</option><option>معطل</option></select>
+        </div>
+        <div class="form-group">
+          <label>الفني</label>
+          <div style="display:flex;gap:6px">
+            <select id="r-tech" style="flex:1"></select>
+            <button type="button" class="btn btn-ghost btn-sm" onclick="addTechInline('r-tech')">+</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>التاريخ</label>
+          <input type="date" id="r-date">
+        </div>
+        <div class="form-group full">
+          <label>ملاحظات</label>
+          <textarea id="r-notes" placeholder="ملاحظات..."></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-round')">إلغاء</button>
+      <button class="btn btn-primary" onclick="saveRound()">💾 حفظ</button>
+    </div>
+  </div>
+</div>
+
+<!-- INVOICE MODAL -->
+<div class="modal-overlay" id="modal-invoice">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div class="modal-title" id="inv-modal-title">🧾 فاتورة جديدة</div>
+      <button class="modal-close" onclick="closeModal('modal-invoice')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="i-id">
+      <div class="form-grid">
+        <div class="form-group"><label>اسم الشركة *</label><input type="text" id="i-company" placeholder="اسم الشركة"></div>
+        <div class="form-group"><label>رقم الفاتورة</label><input type="text" id="i-num" placeholder="INV-001"></div>
+        <div class="form-group full"><label>بيان الفاتورة</label><textarea id="i-details" placeholder="تفاصيل الفاتورة..."></textarea></div>
+        <div class="form-group"><label>القيمة</label><input type="text" id="i-amount" placeholder="0.00"></div>
+        <div class="form-group">
+          <label>الحالة</label>
+          <select id="i-status"><option>تم تسليمها للفرع</option><option>لم يتم تسليمها حتى الآن</option><option>تعلية</option></select>
+        </div>
+        <div class="form-group">
+          <label>الفني</label>
+          <div style="display:flex;gap:6px">
+            <select id="i-tech" style="flex:1"></select>
+            <button type="button" class="btn btn-ghost btn-sm" onclick="addTechInline('i-tech')">+</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>التاريخ (اختياري)</label>
+          <input type="date" id="i-date">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-invoice')">إلغاء</button>
+      <button class="btn btn-primary" onclick="saveInvoice()">💾 حفظ</button>
+    </div>
+  </div>
+</div>
+
+<!-- DEVICE MODAL -->
+<div class="modal-overlay" id="modal-device">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div class="modal-title" id="dev-modal-title">⚙️ إضافة جهاز</div>
+      <button class="modal-close" onclick="closeModal('modal-device')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="d-id">
+      <div class="form-grid">
+        <div class="form-group"><label>اسم الجهاز *</label><input type="text" id="d-name"></div>
+        <div class="form-group"><label>الماركة</label><input type="text" id="d-brand"></div>
+        <div class="form-group"><label>الموديل</label><input type="text" id="d-model"></div>
+        <div class="form-group"><label>الرقم المسلسل</label><input type="text" id="d-serial"></div>
+        <div class="form-group"><label>سنة التوريد</label><input type="text" id="d-year"></div>
+        <div class="form-group"><label>السعر</label><input type="text" id="d-price"></div>
+        <div class="form-group"><label>الشركة الموردة</label><input type="text" id="d-supplier"></div>
+        <div class="form-group"><label>الضمان/الصيانة</label><input type="text" id="d-warranty"></div>
+        <div class="form-group">
+          <label>الحالة</label>
+          <select id="d-status"><option>يعمل</option><option>لا يعمل</option><option>جار تكهينه</option></select>
+        </div>
+        <div class="form-group">
+          <label>القسم</label>
+          <select id="d-dept"><option>العمليات</option><option>التعقيم</option><option>العناية</option><option>الداخلي</option><option>الأشعة</option><option>المعمل</option></select>
+        </div>
+        <div class="form-group full"><label>ملاحظات</label><textarea id="d-notes"></textarea></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-device')">إلغاء</button>
+      <button class="btn btn-primary" onclick="saveDevice()">💾 حفظ</button>
+    </div>
+  </div>
+</div>
+
+<!-- PRINT REPORT -->
+<div id="print-report">
+  <div class="p-hdr">
+    <div class="p-titles">
+      <div class="p-title" id="p-title">تقرير</div>
+      <div class="p-date" id="p-date"></div>
+    </div>
+    <div class="p-org">
+      <div>الهيئة العامة للتأمين الصحي فرع دمياط</div>
+      <div>مستشفى الهلال</div>
+      <div>قسم الهندسة الطبية</div>
+    </div>
+  </div>
+  <div id="p-content"></div>
+  <div id="p-sigs"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================================
+// CONFIG
+// ============================================================
+const FACILITIES = {
+  helal: {
+    name: 'مستشفى الهلال',
+    org: 'الهيئة العامة للتأمين الصحي فرع دمياط',
+    icon: '🏥',
+    url: 'https://dctkawjrdfuubyysvken.supabase.co',
+    key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRjdGthd2pyZGZ1dWJ5eXN2a2VuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2NzU3NTcsImV4cCI6MjA5MzI1MTc1N30.PEFET_QD1VswUbbGb_r4qmLfIGFeoXdCMuWuFPgtPzo'
+  },
+  talaba: {
+    name: 'عيادة الطلبة الشاملة',
+    org: 'الهيئة العامة للتأمين الصحي فرع دمياط',
+    icon: '🏫',
+    url: 'https://nrvdltjwmzkkslwmeftf.supabase.co',
+    key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ydmRsdGp3bXpra3Nsd21lZnRmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxODcwOTUsImV4cCI6MjA5Mzc2MzA5NX0.5kpoJodT9zc7oQ_9VQtyWSsdSgqS9VhunB3Hd8kVoTs'
+  }
+};
+
+let currentFacility = null;
+let SUPABASE_URL = '';
+let SUPABASE_KEY = '';
+let H = {};
+
+function selectFacility(id) {
+  const f = FACILITIES[id];
+  if (!f) return;
+  currentFacility = id;
+  SUPABASE_URL = f.url;
+  SUPABASE_KEY = f.key;
+  H = { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json' };
+  
+  // Save to localStorage
+  localStorage.setItem('helal_facility', id);
+
+  // Update UI
+  document.getElementById('facility-screen').style.display = 'none';
+  document.querySelector('.logo-name').textContent = f.name;
+  document.querySelector('.logo-sub').textContent = f.org;
+  document.querySelector('.logo-icon').textContent = f.icon;
+
+  // Add switch button to header
+  const switchBtn = document.getElementById('switch-facility-btn');
+  if (switchBtn) switchBtn.style.display = 'flex';
+
+  // Update print org name
+  const orgDivs = document.querySelectorAll('.p-org div');
+  if (orgDivs[1]) orgDivs[1].textContent = f.name;
+
+  // Load departments then data
+  loadDepts().then(() => {
+    fillTechSelects();
+    loadDashboard();
+  });
+}
+
+function switchFacility() {
+  // Reset state
+  state.maintenance = []; state.rounds = []; state.invoices = []; state.devices = [];
+  document.getElementById('facility-screen').style.display = 'flex';
+}
+
+let DEPT_ORDER = ['العمليات','التعقيم','العناية','الداخلي','الأشعة','المعمل'];
+
+async function loadDepts() {
+  try {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/departments?order=sort_order.asc`, { headers: H });
+    if (r.ok) {
+      const d = await r.json();
+      if (Array.isArray(d) && d.length > 0) {
+        DEPT_ORDER = d.map(x => x.name);
+        state.depts = d;
+      }
+    }
+  } catch(e) { console.error('loadDepts', e); }
+  updateDeptSelects();
+}
+
+function updateDeptSelects() {
+  const opts = DEPT_ORDER.map(d => `<option>${d}</option>`).join('');
+  ['m-dept','r-dept','bulk-dept','d-dept'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const cur = el.value;
+    el.innerHTML = opts;
+    if (cur && DEPT_ORDER.includes(cur)) el.value = cur;
+  });
+  // Update filter selects
+  const filterOpts = '<option value="">كل الأقسام</option>' + DEPT_ORDER.map(d => `<option>${d}</option>`).join('');
+  document.querySelectorAll('.dept-filter-sel').forEach(el => {
+    const cur = el.value;
+    el.innerHTML = filterOpts;
+    if (cur) el.value = cur;
+  });
+}
+
+async function manageDepts() {
+  if (!state.depts) state.depts = [];
+  const modal = document.createElement('div');
+  modal.id = 'depts-modal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px';
+  
+  const renderList = () => {
+    const list = (state.depts || []).map((d, i) => `
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;background:var(--surface2);padding:10px;border-radius:8px;border:1px solid var(--border)">
+        <span style="color:var(--muted-color);cursor:grab;font-size:16px">⠿</span>
+        <span style="flex:1;font-size:14px;font-weight:600">${d.name}</span>
+        <button onclick="editDept('${d.id}','${d.name}')" style="background:var(--primary-light);color:var(--primary);border:none;padding:5px 10px;border-radius:6px;cursor:pointer;font-family:Cairo,sans-serif;font-size:12px;font-weight:700">تعديل</button>
+        <button onclick="deleteDept('${d.id}')" style="background:var(--danger-light);color:var(--danger);border:none;padding:5px 10px;border-radius:6px;cursor:pointer;font-family:Cairo,sans-serif;font-size:12px;font-weight:700">حذف</button>
+      </div>`).join('');
+    document.getElementById('depts-list').innerHTML = list || '<div style="text-align:center;color:var(--muted-color);padding:20px">لا توجد أقسام</div>';
+  };
+
+  modal.innerHTML = `<div style="background:#fff;border-radius:12px;padding:22px;width:100%;max-width:440px;max-height:80vh;overflow-y:auto;box-shadow:0 10px 25px rgba(0,0,0,.15)">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <div style="font-size:16px;font-weight:900">🏢 إدارة الأقسام</div>
+      <button onclick="document.getElementById('depts-modal').remove()" style="background:none;border:none;font-size:18px;cursor:pointer;color:#64748b">✕</button>
+    </div>
+    <div id="depts-list"></div>
+    <div style="display:flex;gap:8px;margin-top:14px;padding-top:14px;border-top:1px solid #e2e8f0">
+      <input type="text" id="new-dept-inp" placeholder="اسم القسم الجديد" style="flex:1;padding:9px 12px;border:1px solid #e2e8f0;border-radius:8px;font-family:Cairo,sans-serif;font-size:13px">
+      <button onclick="addDept()" style="background:var(--primary);color:#fff;border:none;padding:9px 16px;border-radius:8px;font-family:Cairo,sans-serif;font-weight:700;cursor:pointer">+ إضافة</button>
+    </div>
+  </div>`;
+  document.body.appendChild(modal);
+  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+  renderList();
+}
+
+window.editDept = async function(id, oldName) {
+  const newName = prompt('اسم القسم الجديد:', oldName);
+  if (!newName?.trim() || newName === oldName) return;
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/departments?id=eq.${id}`, {
+      method: 'PATCH', headers: { ...H, 'Prefer': 'return=representation' },
+      body: JSON.stringify({ name: newName.trim() })
+    });
+    await loadDepts();
+    document.getElementById('depts-modal')?.remove();
+    manageDepts();
+    showToast('تم تعديل القسم ✓');
+  } catch(e) { showToast('حدث خطأ', 'error'); }
+};
+
+window.deleteDept = async function(id) {
+  if (!confirm('حذف هذا القسم؟')) return;
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/departments?id=eq.${id}`, { method: 'DELETE', headers: H });
+    await loadDepts();
+    document.getElementById('depts-modal')?.remove();
+    manageDepts();
+    showToast('تم الحذف', 'error');
+  } catch(e) { showToast('حدث خطأ', 'error'); }
+};
+
+window.addDept = async function() {
+  const inp = document.getElementById('new-dept-inp');
+  const name = inp.value.trim();
+  if (!name) return;
+  try {
+    const maxOrder = (state.depts || []).reduce((m, d) => Math.max(m, d.sort_order || 0), 0);
+    await fetch(`${SUPABASE_URL}/rest/v1/departments`, {
+      method: 'POST', headers: { ...H, 'Prefer': 'return=representation' },
+      body: JSON.stringify({ name, sort_order: maxOrder + 1 })
+    });
+    inp.value = '';
+    await loadDepts();
+    document.getElementById('depts-modal')?.remove();
+    manageDepts();
+    showToast('تم إضافة القسم ✓');
+  } catch(e) { showToast('حدث خطأ', 'error'); }
+};
+
+// ============================================================
+// DB
+// ============================================================
+async function dbGet(table, qs='') {
+  try {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}?order=created_at.desc${qs}`, { headers: H });
+    if (!r.ok) throw new Error(r.status);
+    const d = await r.json();
+    return Array.isArray(d) ? d : [];
+  } catch(e) { console.error('dbGet', table, e); return []; }
+}
+
+async function dbGetDevices() {
+  try {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/devices?order=sort_order.asc,created_at.asc`, { headers: H });
+    if (!r.ok) throw new Error(r.status);
+    const d = await r.json();
+    return Array.isArray(d) ? d : [];
+  } catch(e) { console.error('dbGetDevices', e); return []; }
+}
+
+async function dbInsert(table, data) {
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
+    method: 'POST', headers: { ...H, 'Prefer': 'return=representation' }, body: JSON.stringify(data)
+  });
+  return r.json();
+}
+
+async function dbUpdate(table, id, data) {
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`, {
+    method: 'PATCH', headers: { ...H, 'Prefer': 'return=representation' }, body: JSON.stringify(data)
+  });
+  return r.json();
+}
+
+async function dbDelete(table, id) {
+  await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`, { method: 'DELETE', headers: H });
+}
+
+// ============================================================
+// STATE
+// ============================================================
+const state = { maintenance: [], rounds: [], invoices: [], devices: [], techs: [] };
+const filters = {
+  maint: { search:'', dept:'', tab:'broken' },
+  rounds: { type:'today', specific:'' },
+  invoices: { search:'', status:'' },
+  devices: { search:'', dept:'' }
+};
+const sel = { maint: new Set(), rounds: new Set(), invoices: new Set(), devices: new Set() };
+let inSelMode = { maint:false, rounds:false, invoices:false, devices:false };
+
+// ============================================================
+// UTILS
+// ============================================================
+const today = () => new Date().toISOString().split('T')[0];
+
+function fmtDate(d) {
+  if (!d) return '-';
+  return new Date(d).toLocaleDateString('ar-EG', { day:'numeric', month:'short', year:'numeric' });
+}
+
+function showToast(msg, type='success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast toast-${type} show`;
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+function badge(type, text) {
+  return `<span class="badge badge-${type}">${text}</span>`;
+}
+
+function statusBadge(s) {
+  if (!s) return badge('gray', '-');
+  if (s === 'يعمل بحالة جيدة' || s === 'يعمل') return badge('green', '✓ ' + s);
+  if (s === 'معطل' || s === 'لا يعمل') return badge('red', '✗ ' + s);
+  if (s === 'تحت الاختبار') return badge('yellow', '⚡ ' + s);
+  if (s === 'تم تسليمها للفرع') return badge('green', '✓ ' + s);
+  if (s === 'لم يتم تسليمها حتى الآن') return badge('orange', '⏳ ' + s);
+  if (s === 'تعلية') return badge('blue', '↑ ' + s);
+  return badge('gray', s);
+}
+
+function maintTypeBadge(t) {
+  if (t === 'عطل مفاجئ') return badge('red', '⚡ ' + t);
+  if (t === 'صيانة دورية') return badge('blue', '🔧 ' + t);
+  if (t === 'إصلاح') return badge('green', '✓ ' + t);
+  if (t === 'تركيب جهاز جديد') return badge('yellow', '🆕 ' + t);
+  return badge('gray', t || '-');
+}
+
+// Techs
+function getTechs() {
+  const s = localStorage.getItem('helal_techs');
+  return s ? JSON.parse(s) : ['أنا', 'الفني 2', 'الفني 3'];
+}
+
+function saveTechs(arr) { localStorage.setItem('helal_techs', JSON.stringify(arr)); }
+
+function fillTechSelects() {
+  const techs = getTechs();
+  ['m-tech', 'r-tech', 'bulk-tech'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const cur = el.value;
+    el.innerHTML = techs.map(t => `<option>${t}</option>`).join('');
+    if (cur) el.value = cur;
+  });
+}
+
+function manageTechs() {
+  const techs = getTechs();
+  const list = techs.map((t, i) => `
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+      <span style="flex:1;font-size:14px">${t}</span>
+      <button onclick="deleteTech(${i})" style="background:var(--danger-light);color:var(--danger);border:none;padding:5px 10px;border-radius:6px;cursor:pointer;font-family:Cairo,sans-serif;font-size:12px;font-weight:700">حذف</button>
+    </div>`).join('');
+  
+  const modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px';
+  modal.innerHTML = `<div style="background:#fff;border-radius:12px;padding:22px;width:100%;max-width:400px;box-shadow:0 10px 25px rgba(0,0,0,.1)">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <div style="font-size:16px;font-weight:900">👷 إدارة الفنيين</div>
+      <button onclick="this.closest('[style*=fixed]').remove()" style="background:none;border:none;font-size:18px;cursor:pointer;color:#64748b">✕</button>
+    </div>
+    <div id="tech-list">${list}</div>
+    <div style="display:flex;gap:8px;margin-top:14px;padding-top:14px;border-top:1px solid #e2e8f0">
+      <input type="text" id="new-tech-inp" placeholder="اسم الفني الجديد" style="flex:1;padding:9px 12px;border:1px solid #e2e8f0;border-radius:8px;font-family:Cairo,sans-serif;font-size:13px">
+      <button onclick="addNewTech()" style="background:var(--primary);color:#fff;border:none;padding:9px 16px;border-radius:8px;font-family:Cairo,sans-serif;font-weight:700;cursor:pointer">+ إضافة</button>
+    </div>
+  </div>`;
+  document.body.appendChild(modal);
+  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+}
+
+window.deleteTech = function(idx) {
+  const techs = getTechs();
+  techs.splice(idx, 1);
+  saveTechs(techs);
+  fillTechSelects();
+  manageTechs();
+  document.querySelector('[style*=fixed][style*=z-index]')?.remove();
+};
+
+window.addNewTech = function() {
+  const inp = document.getElementById('new-tech-inp');
+  const name = inp.value.trim();
+  if (!name) return;
+  const techs = getTechs();
+  if (!techs.includes(name)) { techs.push(name); saveTechs(techs); }
+  fillTechSelects();
+  inp.value = '';
+  document.querySelector('[style*=fixed][style*=z-index]')?.remove();
+  manageTechs();
+};
+
+function addTechInline(selectId) {
+  const name = prompt('أدخل اسم الفني الجديد:');
+  if (!name?.trim()) return;
+  const techs = getTechs();
+  if (!techs.includes(name.trim())) { techs.push(name.trim()); saveTechs(techs); }
+  fillTechSelects();
+  document.getElementById(selectId).value = name.trim();
+}
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+function showSection(name) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('section-' + name).classList.add('active');
+  const map = { dashboard:0, maintenance:1, rounds:2, invoices:3, devices:4 };
+  document.querySelectorAll('.nav-btn')[map[name]]?.classList.add('active');
+  if (name === 'dashboard') loadDashboard();
+  if (name === 'maintenance') loadMaint();
+  if (name === 'rounds') loadRounds();
+  if (name === 'invoices') loadInvoices();
+  if (name === 'devices') loadDevices();
+}
+
+// ============================================================
+// MODAL
+// ============================================================
+function openModal(id, editId=null) {
+  if (id === 'modal-maint') {
+    document.getElementById('m-id').value = editId || '';
+    document.getElementById('maint-modal-title').textContent = editId ? '🔧 تعديل البلاغ' : '🔧 بلاغ صيانة جديد';
+    fillTechSelects();
+    updateAllDeptSelects();
+    if (!editId) {
+      document.getElementById('m-type').value = 'عطل مفاجئ';
+      document.getElementById('m-date').value = today();
+      updateMaintDateFields();
+      document.getElementById('m-dept').value = 'العمليات';
+      loadMaintDevices();
+      document.getElementById('m-action').value = '';
+      document.getElementById('m-status').value = 'معطل';
+      document.getElementById('m-date').value = today();
+      document.getElementById('repair-date-group').style.display = 'none';
+      document.getElementById('m-repair-date').value = '';
+    } else {
+      const r = state.maintenance.find(x => x.id === editId);
+      if (r) {
+        document.getElementById('m-type').value = r.type || '';
+        document.getElementById('m-dept').value = r.dept || 'العمليات';
+        loadMaintDevices(r.device_name);
+        document.getElementById('m-action').value = r.action_taken || '';
+        document.getElementById('m-status').value = r.device_status || 'معطل';
+        document.getElementById('m-tech').value = r.tech || '';
+        document.getElementById('m-date').value = r.report_date || r.created_at?.split('T')[0] || '';
+        document.getElementById('m-repair-date').value = r.repair_date || '';
+        updateMaintDateFields();
+      }
+    }
+  }
+
+  if (id === 'modal-round') {
+    document.getElementById('r-id').value = editId || '';
+    fillTechSelects();
+    if (editId) {
+      const r = state.rounds.find(x => x.id === editId);
+      if (r) {
+        document.getElementById('r-dept').value = r.dept || 'العمليات';
+        loadRoundDevices(r.device_name);
+        document.getElementById('r-status').value = r.status || '';
+        document.getElementById('r-tech').value = r.tech || '';
+        document.getElementById('r-date').value = r.date || today();
+        document.getElementById('r-notes').value = r.notes || '';
+      }
+    } else {
+      document.getElementById('r-dept').value = 'العمليات';
+      loadRoundDevices();
+      document.getElementById('r-date').value = today();
+      document.getElementById('r-notes').value = '';
+    }
+  }
+
+  if (id === 'modal-invoice') {
+    document.getElementById('i-id').value = editId || '';
+    document.getElementById('inv-modal-title').textContent = editId ? '🧾 تعديل الفاتورة' : '🧾 فاتورة جديدة';
+    if (!editId) {
+      ['i-company','i-num','i-details','i-amount'].forEach(f => document.getElementById(f).value = '');
+      document.getElementById('i-date').value = today();
+      fillTechSelects();
+      updateAllDeptSelects();
+    } else {
+      const r = state.invoices.find(x => x.id === editId);
+      if (r) {
+        document.getElementById('i-company').value = r.company_name || '';
+        document.getElementById('i-num').value = r.invoice_number || '';
+        document.getElementById('i-details').value = r.invoice_details || '';
+        document.getElementById('i-amount').value = r.amount || '';
+        document.getElementById('i-status').value = r.invoice_status || '';
+        document.getElementById('i-date').value = r.invoice_date || '';
+        document.getElementById('i-tech').value = r.tech || '';
+      }
+    }
+  }
+
+  if (id === 'modal-device') {
+    document.getElementById('d-id').value = editId || '';
+    document.getElementById('dev-modal-title').textContent = editId ? '⚙️ تعديل الجهاز' : '⚙️ إضافة جهاز';
+    if (!editId) {
+      ['d-name','d-brand','d-model','d-serial','d-year','d-price','d-supplier','d-warranty','d-notes'].forEach(f => document.getElementById(f).value = '');
+    } else {
+      const r = state.devices.find(x => x.id === editId);
+      if (r) {
+        document.getElementById('d-name').value = r.name || '';
+        document.getElementById('d-brand').value = r.brand || '';
+        document.getElementById('d-model').value = r.model || '';
+        document.getElementById('d-serial').value = r.serial || '';
+        document.getElementById('d-year').value = r.year || '';
+        document.getElementById('d-price').value = r.price || '';
+        document.getElementById('d-supplier').value = r.supplier || '';
+        document.getElementById('d-warranty').value = r.warranty_status || '';
+        document.getElementById('d-status').value = r.technical_status || 'يعمل';
+        document.getElementById('d-dept').value = r.dept || 'العمليات';
+        document.getElementById('d-notes').value = r.notes || '';
+      }
+    }
+  }
+
+  document.getElementById(id).classList.add('open');
+}
+
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+document.querySelectorAll('.modal-overlay').forEach(o => {
+  o.addEventListener('click', e => { if (e.target === o) closeModal(o.id); });
+});
+
+// ============================================================
+// MAINTENANCE DEVICES SELECT
+// ============================================================
+async function loadMaintDevices(selected='') {
+  if (state.devices.length === 0) state.devices = await dbGetDevices();
+  const dept = document.getElementById('m-dept')?.value;
+  const sel = document.getElementById('m-device');
+  if (!sel) return;
+  const devs = state.devices.filter(d => d.dept === dept && d.technical_status !== 'جار تكهينه');
+  sel.innerHTML = '<option value="">-- اختر الجهاز --</option>' +
+    devs.map(d => `<option value="${d.name}" ${d.name === selected ? 'selected' : ''}>${d.name}${d.brand ? ' — ' + d.brand : ''}</option>`).join('');
+}
+
+async function loadRoundDevices(selected='') {
+  if (state.devices.length === 0) state.devices = await dbGetDevices();
+  const dept = document.getElementById('r-dept')?.value;
+  const sel = document.getElementById('r-device');
+  if (!sel) return;
+  const devs = state.devices.filter(d => d.dept === dept && d.technical_status !== 'جار تكهينه');
+  sel.innerHTML = devs.map(d => `<option value="${d.name}" ${d.name === selected ? 'selected' : ''}>${d.name}${d.brand ? ' — ' + d.brand : ''}</option>`).join('');
+}
+
+// ============================================================
+// REPAIR DATE TOGGLE
+// ============================================================
+function updateMaintDateFields() {
+  const type = document.getElementById('m-type').value;
+  const status = document.getElementById('m-status').value;
+  const dateGrp = document.getElementById('m-date-group');
+  const repairGrp = document.getElementById('repair-date-group');
+  const dateLabel = dateGrp.querySelector('label');
+
+  const isPeriodic = type === 'صيانة دورية';
+  const isInstall = type === 'تركيب جهاز جديد';
+  const isFault = type === 'عطل مفاجئ' || type === 'إصلاح';
+
+  // Date label
+  if (isPeriodic) dateLabel.textContent = 'تاريخ الصيانة (اختياري)';
+  else if (isInstall) dateLabel.textContent = 'تاريخ التركيب (اختياري)';
+  else dateLabel.textContent = 'تاريخ العطل';
+
+  // Set default date if fault type
+  if (isFault && !document.getElementById('m-date').value) {
+    document.getElementById('m-date').value = today();
+  }
+
+  // Show/hide repair date - only for fault/repair types when status is fixed
+  if ((isPeriodic || isInstall)) {
+    repairGrp.style.display = 'none';
+    document.getElementById('m-repair-date').value = '';
+    // Also hide status options that don't apply
+    const statusSel = document.getElementById('m-status');
+    if (isPeriodic || isInstall) {
+      statusSel.value = 'يعمل بحالة جيدة';
+    }
+  } else {
+    // For fault types show repair date if status is fixed
+    if (status === 'يعمل بحالة جيدة') {
+      repairGrp.style.display = 'block';
+      if (!document.getElementById('m-repair-date').value) document.getElementById('m-repair-date').value = today();
+    } else {
+      repairGrp.style.display = 'none';
+    }
+  }
+}
+
+function toggleMaintDate(type) { updateMaintDateFields(); }
+function toggleRepairDate(status) { updateMaintDateFields(); }
+
+// ============================================================
+// SAVE / DELETE
+// ============================================================
+async function saveMaint() {
+  const device = document.getElementById('m-device').value;
+  const action = document.getElementById('m-action').value.trim();
+  if (!device) return showToast('اختر الجهاز', 'error');
+  if (!action) return showToast('أدخل الإجراء المتخذ', 'error');
+
+  const editId = document.getElementById('m-id').value;
+  const status = document.getElementById('m-status').value;
+  const data = {
+    type: document.getElementById('m-type').value,
+    device_name: device,
+    dept: document.getElementById('m-dept').value,
+    action_taken: action,
+    device_status: status,
+    tech: document.getElementById('m-tech').value,
+    report_date: document.getElementById('m-date').value || null,
+    repair_date: status === 'يعمل بحالة جيدة' ? (document.getElementById('m-repair-date').value || null) : null
+  };
+
+  try {
+    if (editId) await dbUpdate('maintenance', editId, data);
+    else await dbInsert('maintenance', data);
+    closeModal('modal-maint');
+    showToast(editId ? 'تم التعديل ✓' : 'تم حفظ البلاغ ✓');
+    await loadMaint();
+    updateHdrStats();
+  } catch(e) { showToast('حدث خطأ', 'error'); }
+}
+
+async function saveRound() {
+  const device = document.getElementById('r-device').value;
+  if (!device) return showToast('اختر الجهاز', 'error');
+  const editId = document.getElementById('r-id').value;
+  const data = {
+    date: document.getElementById('r-date').value || today(),
+    dept: document.getElementById('r-dept').value,
+    device_name: device,
+    status: document.getElementById('r-status').value,
+    tech: document.getElementById('r-tech').value,
+    notes: document.getElementById('r-notes').value.trim()
+  };
+  try {
+    if (editId) await dbUpdate('rounds', editId, data);
+    else await dbInsert('rounds', data);
+    closeModal('modal-round');
+    showToast('تم الحفظ ✓');
+    await loadRounds();
+  } catch(e) { showToast('حدث خطأ', 'error'); }
+}
+
+async function saveInvoice() {
+  const company = document.getElementById('i-company').value.trim();
+  if (!company) return showToast('أدخل اسم الشركة', 'error');
+  const editId = document.getElementById('i-id').value;
+  const iDate = document.getElementById('i-date').value;
+  const data = {
+    company_name: company,
+    invoice_number: document.getElementById('i-num').value.trim(),
+    invoice_details: document.getElementById('i-details').value.trim(),
+    amount: document.getElementById('i-amount').value.trim(),
+    invoice_status: document.getElementById('i-status').value,
+    invoice_date: iDate || null,
+    tech: document.getElementById('i-tech').value
+  };
+  try {
+    if (editId) await dbUpdate('invoices', editId, data);
+    else await dbInsert('invoices', data);
+    closeModal('modal-invoice');
+    showToast('تم الحفظ ✓');
+    await loadInvoices();
+  } catch(e) { showToast('حدث خطأ', 'error'); }
+}
+
+async function saveDevice() {
+  const name = document.getElementById('d-name').value.trim();
+  if (!name) return showToast('أدخل اسم الجهاز', 'error');
+  const editId = document.getElementById('d-id').value;
+  const data = {
+    name, brand: document.getElementById('d-brand').value.trim(),
+    model: document.getElementById('d-model').value.trim(),
+    serial: document.getElementById('d-serial').value.trim(),
+    year: document.getElementById('d-year').value.trim(),
+    price: document.getElementById('d-price').value.trim(),
+    supplier: document.getElementById('d-supplier').value.trim(),
+    warranty_status: document.getElementById('d-warranty').value.trim(),
+    technical_status: document.getElementById('d-status').value,
+    dept: document.getElementById('d-dept').value,
+    notes: document.getElementById('d-notes').value.trim()
+  };
+  try {
+    if (editId) await dbUpdate('devices', editId, data);
+    else await dbInsert('devices', data);
+    closeModal('modal-device');
+    showToast('تم الحفظ ✓');
+    await loadDevices();
+    updateHdrStats();
+  } catch(e) { showToast('حدث خطأ', 'error'); }
+}
+
+async function duplicateDevice(id) {
+  const d = state.devices.find(x => x.id === id);
+  if (!d) return;
+  const copy = { ...d };
+  delete copy.id; delete copy.created_at;
+  copy.name = copy.name + ' (نسخة)';
+  try {
+    await dbInsert('devices', copy);
+    showToast('تم نسخ الجهاز ✓');
+    await loadDevices();
+  } catch(e) { showToast('حدث خطأ', 'error'); }
+}
+
+// ============================================================
+// LOAD MAINTENANCE
+// ============================================================
+async function loadMaint() {
+  const rawMaint = await dbGet('maintenance');
+  state.maintenance = rawMaint.sort((a,b) => {
+    const da = a.report_date || a.created_at?.split('T')[0] || '';
+    const db2 = b.report_date || b.created_at?.split('T')[0] || '';
+    return db2.localeCompare(da);
+  });
+  renderMaint();
+  updateHdrStats();
+}
+
+function renderMaint() {
+  const tab = filters.maint.tab;
+  let list = [...state.maintenance];
+
+  if (filters.maint.search) {
+    const s = filters.maint.search.toLowerCase();
+    list = list.filter(r => (r.device_name||'').toLowerCase().includes(s) || (r.action_taken||'').toLowerCase().includes(s));
+  }
+  if (filters.maint.dept) list = list.filter(r => r.dept === filters.maint.dept);
+
+  const broken = list.filter(r => r.device_status !== 'يعمل بحالة جيدة');
+  const fixed = list.filter(r => r.device_status === 'يعمل بحالة جيدة');
+
+  const periodic = list.filter(r => r.type === 'صيانة دورية');
+  const install = list.filter(r => r.type === 'تركيب جهاز جديد');
+  const brokenOnly = list.filter(r => r.type !== 'صيانة دورية' && r.type !== 'تركيب جهاز جديد' && r.device_status !== 'يعمل بحالة جيدة');
+  const fixedOnly = list.filter(r => r.type !== 'صيانة دورية' && r.type !== 'تركيب جهاز جديد' && r.device_status === 'يعمل بحالة جيدة');
+
+  document.getElementById('cnt-broken').textContent = brokenOnly.length;
+  document.getElementById('cnt-fixed').textContent = fixedOnly.length;
+  document.getElementById('cnt-periodic').textContent = periodic.length;
+  document.getElementById('cnt-install').textContent = install.length;
+  document.getElementById('cnt-all').textContent = list.length;
+  document.getElementById('badge-maint').textContent = brokenOnly.length;
+
+  let display;
+  if (tab === 'broken') display = brokenOnly;
+  else if (tab === 'fixed') display = fixedOnly;
+  else if (tab === 'periodic') display = periodic;
+  else if (tab === 'install') display = install;
+  else display = list;
+
+  const tbody = document.getElementById('maint-tbody');
+  if (!display.length) {
+    tbody.innerHTML = `<tr><td colspan="9"><div class="empty"><div class="empty-icon">🔧</div><div class="empty-text">لا توجد نتائج</div></div></td></tr>`;
+    return;
+  }
+
+  // Update header based on tab
+  const th1 = document.getElementById('th-date1');
+  const th2 = document.getElementById('th-date2');
+  if (th1 && th2) {
+    if (tab === 'periodic') { th1.textContent = 'تاريخ الصيانة'; th2.textContent = ''; th2.style.display = 'none'; }
+    else if (tab === 'install') { th1.textContent = 'تاريخ التركيب'; th2.textContent = ''; th2.style.display = 'none'; }
+    else { th1.textContent = 'تاريخ العطل'; th2.textContent = 'تاريخ الإصلاح'; th2.style.display = ''; }
+  }
+
+  tbody.innerHTML = display.map((r, i) => {
+    const isPeriodic = r.type === 'صيانة دورية';
+    const isInstall = r.type === 'تركيب جهاز جديد';
+    const hideDate2 = isPeriodic || isInstall;
+    const date1Label = isPeriodic ? 'تاريخ الصيانة' : isInstall ? 'تاريخ التركيب' : 'تاريخ العطل';
+    return `<tr data-id="${r.id}" data-sel="maint">
+      <td style="color:var(--muted-color);font-size:12px;text-align:center">${i + 1}</td>
+      <td>${maintTypeBadge(r.type)}</td>
+      <td><strong>${r.device_name||'-'}</strong></td>
+      <td>${badge('gray', r.dept||'-')}</td>
+      <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:help" title="${r.action_taken||''}">${r.action_taken||'-'}</td>
+      <td>${statusBadge(r.device_status)}</td>
+      <td style="font-size:12px;color:var(--muted-color)">${r.tech||'-'}</td>
+      <td style="font-size:12px;color:var(--muted-color);white-space:nowrap">${r.report_date ? fmtDate(r.report_date) : '-'}</td>
+      <td style="font-size:12px;white-space:nowrap">
+        ${hideDate2 ? '<span style="color:var(--muted-color);font-size:11px">—</span>' : r.repair_date ? `<span style="color:var(--success);font-weight:700">✅ ${fmtDate(r.repair_date)}</span>` : '<span style="color:var(--muted-color);font-size:11px">—</span>'}
+      </td>
+      <td>
+        <div style="display:flex;gap:4px">
+          <button class="btn btn-ghost btn-sm" onclick="openModal('modal-maint','${r.id}')">✏️</button>
+          <button class="btn btn-danger btn-sm" onclick="delMaint('${r.id}')">🗑</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+
+  attachSel('maint');
+}
+
+function switchMaintTab(tab) {
+  filters.maint.tab = tab;
+  ['broken','fixed','periodic','install','all-maint'].forEach(t => {
+    document.getElementById('tab-' + t)?.classList.remove('active');
+  });
+  document.getElementById('tab-' + tab)?.classList.add('active');
+  renderMaint();
+}
+
+function filterMaint(v) { filters.maint.search = v; renderMaint(); }
+function filterMaintDept(v) { filters.maint.dept = v; renderMaint(); }
+
+async function delMaint(id) {
+  if (!confirm('حذف هذا البلاغ؟')) return;
+  await dbDelete('maintenance', id);
+  showToast('تم الحذف', 'error');
+  await loadMaint();
+}
+
+// ============================================================
+// LOAD ROUNDS
+// ============================================================
+async function loadRounds() {
+  state.rounds = await dbGet('rounds');
+  renderRounds();
+  updateHdrStats();
+}
+
+function onRoundsFilter(val) {
+  filters.rounds.type = val;
+  const inp = document.getElementById('rounds-specific');
+  if (val === 'specific') {
+    inp.style.display = 'block';
+    inp.value = today();
+    filters.rounds.specific = today();
+  } else {
+    inp.style.display = 'none';
+  }
+  renderRounds();
+}
+
+function renderRounds() {
+  const ft = filters.rounds.type;
+  let list = [...state.rounds];
+
+  if (ft === 'today') list = list.filter(r => r.date === today());
+  else if (ft === 'specific') list = list.filter(r => r.date === (document.getElementById('rounds-specific')?.value || today()));
+  else if (ft === 'week') { const w = new Date(); w.setDate(w.getDate()-7); list = list.filter(r => new Date(r.date) >= w); }
+  else if (ft === 'month') { const m = new Date(); m.setDate(m.getDate()-30); list = list.filter(r => new Date(r.date) >= m); }
+  if (filters.rounds.status) list = list.filter(r => r.status === filters.rounds.status);
+
+  const cont = document.getElementById('rounds-content');
+  if (!list.length) {
+    cont.innerHTML = '<div class="empty"><div class="empty-icon">📋</div><div class="empty-text">لا يوجد مرور مسجل</div></div>';
+    return;
+  }
+
+  // Group by dept in order
+  const byDept = {};
+  list.forEach(r => { if (!byDept[r.dept]) byDept[r.dept] = []; byDept[r.dept].push(r); });
+
+  let html = '';
+  DEPT_LIST.forEach(dept => {
+    if (!byDept[dept]) return;
+    const items = byDept[dept];
+    html += `<div class="round-sect">
+      <div class="round-sect-hdr"><span>${dept}</span><span style="opacity:.8;font-size:12px">${items.length} جهاز</span></div>
+      <div class="round-tbl-wrap">
+        <table>
+          <thead><tr>
+            <th style="min-width:120px">الجهاز</th>
+            <th style="min-width:90px">الحالة</th>
+            <th style="min-width:120px">ملاحظات</th>
+            <th style="min-width:70px">الفني</th>
+            <th style="min-width:90px">التاريخ</th>
+            <th style="width:70px">إجراءات</th>
+          </tr></thead>
+          <tbody>
+            ${items.map(r => `<tr data-id="${r.id}" data-sel="rounds">
+              <td><strong>${r.device_name||'-'}</strong></td>
+              <td>${statusBadge(r.status)}</td>
+              <td style="font-size:12px;color:var(--muted-color)">${r.notes||'-'}</td>
+              <td style="font-size:12px;color:var(--muted-color);white-space:nowrap">${fmtDate(r.date)}</td>
+              <td>
+                <div style="display:flex;gap:4px">
+                  <button class="btn btn-ghost btn-sm" onclick="openModal('modal-round','${r.id}')">✏️</button>
+                  <button class="btn btn-danger btn-sm" onclick="delRound('${r.id}')">🗑</button>
+                </div>
+              </td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>`;
+  });
+
+  cont.innerHTML = html;
+  attachSel('rounds');
+}
+
+async function delRound(id) {
+  if (!confirm('حذف؟')) return;
+  await dbDelete('rounds', id);
+  showToast('تم الحذف', 'error');
+  await loadRounds();
+}
+
+// BULK ROUNDS
+let bulkSel = {};
+
+async function renderBulkDevices() {
+  if (state.devices.length === 0) state.devices = await dbGetDevices();
+  const dept = document.getElementById('bulk-dept').value;
+  const date = document.getElementById('bulk-date').value || today();
+  const todayRounds = state.rounds.filter(r => r.date === date && r.dept === dept);
+  const devs = state.devices.filter(d => d.dept === dept && d.technical_status !== 'جار تكهينه');
+  fillTechSelects();
+
+  const cont = document.getElementById('bulk-devices-list');
+  if (!devs.length) { cont.innerHTML = '<div class="empty"><div class="empty-text">لا توجد أجهزة في هذا القسم</div></div>'; return; }
+
+  cont.innerHTML = `<div style="display:grid;gap:10px">` + devs.map(d => {
+    const key = d.id.replace(/-/g,'_');
+    const ex = todayRounds.find(r => r.device_name === d.name);
+    const saved = bulkSel[key];
+    const status = saved?.status || ex?.status || '';
+    const notes = saved?.notes !== undefined ? saved.notes : (ex?.notes || '');
+    const isGood = status === 'يعمل بحالة جيدة';
+    const isBad = status === 'معطل';
+    return `<div style="background:var(--surface2);border:2px solid ${isGood ? '#a7f3d0' : isBad ? '#fecaca' : 'var(--border)'};border-radius:var(--radius-sm);padding:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div>
+          <div style="font-weight:700;font-size:14px">${d.name}</div>
+          <div style="font-size:11px;color:var(--muted-color)">${d.brand||''}</div>
+        </div>
+        <div style="display:flex;gap:6px">
+          <button onclick="setBulk('${key}','${d.name}','يعمل بحالة جيدة')"
+            style="padding:6px 12px;border-radius:6px;border:2px solid ${isGood ? 'var(--success)' : 'var(--border)'};background:${isGood ? 'var(--success-light)' : '#fff'};color:${isGood ? 'var(--success)' : 'var(--muted-color)'};font-family:Cairo,sans-serif;font-weight:700;font-size:13px;cursor:pointer">✓ يعمل</button>
+          <button onclick="setBulk('${key}','${d.name}','معطل')"
+            style="padding:6px 12px;border-radius:6px;border:2px solid ${isBad ? 'var(--danger)' : 'var(--border)'};background:${isBad ? 'var(--danger-light)' : '#fff'};color:${isBad ? 'var(--danger)' : 'var(--muted-color)'};font-family:Cairo,sans-serif;font-weight:700;font-size:13px;cursor:pointer">✗ معطل</button>
+        </div>
+      </div>
+      <input type="text" id="note-${key}" placeholder="ملاحظات..." value="${notes}"
+        style="width:100%;padding:7px 11px;border:1px solid var(--border);border-radius:6px;font-family:Cairo,sans-serif;font-size:13px">
+    </div>`;
+  }).join('') + '</div>';
+}
+
+function setBulk(key, name, status) {
+  // Save current notes
+  document.querySelectorAll('[id^="note-"]').forEach(el => {
+    const k = el.id.replace('note-','');
+    if (!bulkSel[k]) bulkSel[k] = {};
+    bulkSel[k].notes = el.value;
+  });
+  if (!bulkSel[key]) bulkSel[key] = {};
+  bulkSel[key].status = status;
+  bulkSel[key].name = name;
+  renderBulkDevices();
+}
+
+async function saveBulkRounds() {
+  saveCurrentNotes();
+  const date = document.getElementById('bulk-date').value || today();
+  const tech = document.getElementById('bulk-tech').value;
+
+  const toSave = Object.values(bulkSel).filter(s => s.status && s.name && s.dept);
+  if (!toSave.length) return showToast('اختر حالة جهاز واحد على الأقل', 'error');
+
+  try {
+    const deptGroups = {};
+    toSave.forEach(s => {
+      if (!deptGroups[s.dept]) deptGroups[s.dept] = [];
+      deptGroups[s.dept].push(s);
+    });
+    for (const [dept, items] of Object.entries(deptGroups)) {
+      const existing = state.rounds.filter(r => r.date === date && r.dept === dept);
+      await Promise.all(existing.map(r => dbDelete('rounds', r.id)));
+      await Promise.all(items.map(s => dbInsert('rounds', {
+        date, dept, device_name: s.name, status: s.status, tech, notes: s.notes || ''
+      })));
+    }
+    bulkSel = {};
+    currentDeptIdx = 0;
+    showToast(`تم حفظ ${toSave.length} جهاز ✓`);
+    document.getElementById('rounds-form').style.display = 'none';
+    await loadRounds();
+  } catch(e) { showToast('حدث خطأ', 'error'); }
+}
+function toggleRoundsForm() {
+  const f = document.getElementById('rounds-form');
+  const open = f.style.display === 'none';
+  f.style.display = open ? 'block' : 'none';
+  if (open) {
+    document.getElementById('bulk-date').value = today();
+    fillTechSelects();
+    renderBulkDevices();
+    f.scrollIntoView({ behavior:'smooth' });
+  }
+}
+
+// ============================================================
+// LOAD INVOICES
+// ============================================================
+async function loadInvoices() {
+  state.invoices = await dbGet('invoices', '&order=invoice_date.desc.nullslast,created_at.desc');
+  renderInvoices();
+}
+
+function renderInvoices() {
+  let list = [...state.invoices];
+  if (filters.invoices.search) { const s = filters.invoices.search.toLowerCase(); list = list.filter(r => (r.company_name||'').toLowerCase().includes(s) || (r.invoice_number||'').toLowerCase().includes(s)); }
+  if (filters.invoices.status) list = list.filter(r => r.invoice_status === filters.invoices.status);
+
+  const tbody = document.getElementById('inv-tbody');
+  if (!list.length) { tbody.innerHTML = `<tr><td colspan="8"><div class="empty"><div class="empty-icon">🧾</div><div class="empty-text">لا توجد فواتير</div></div></td></tr>`; return; }
+
+  tbody.innerHTML = list.map((r, i) => `
+    <tr data-id="${r.id}" data-sel="invoices">
+      <td style="color:var(--muted-color);font-size:12px">${i+1}</td>
+      <td><strong>${r.company_name||'-'}</strong></td>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:12px">${r.invoice_number||'-'}</td>
+      <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px">${r.invoice_details||'-'}</td>
+      <td style="font-weight:700;color:var(--warning)">${r.amount ? Number(r.amount).toLocaleString('ar-EG')+' جنيه' : '-'}</td>
+      <td>${statusBadge(r.invoice_status)}</td>
+      <td style="font-size:12px;color:var(--muted-color)">${r.tech||'-'}</td>
+      <td style="font-size:12px;color:var(--muted-color);white-space:nowrap">${fmtDate(r.invoice_date || r.created_at)}</td>
+      <td>
+        <div style="display:flex;gap:4px">
+          <button class="btn btn-ghost btn-sm" onclick="openModal('modal-invoice','${r.id}')">✏️</button>
+          <button class="btn btn-danger btn-sm" onclick="delInvoice('${r.id}')">🗑</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+  attachSel('invoices');
+}
+
+function filterInvoices(v) { filters.invoices.search = v; renderInvoices(); }
+function filterInvoiceStatus(v) { filters.invoices.status = v; renderInvoices(); }
+
+async function delInvoice(id) {
+  if (!confirm('حذف؟')) return;
+  await dbDelete('invoices', id);
+  showToast('تم الحذف', 'error');
+  await loadInvoices();
+}
+
+// ============================================================
+// LOAD DEVICES
+// ============================================================
+async function loadDevices() {
+  state.devices = await dbGetDevices();
+  renderDevices();
+  updateHdrStats();
+}
+
+function renderDevices() {
+  let list = [...state.devices];
+  if (filters.devices.search) { const s = filters.devices.search.toLowerCase(); list = list.filter(d => (d.name||'').toLowerCase().includes(s) || (d.brand||'').toLowerCase().includes(s) || (d.serial||'').toLowerCase().includes(s)); }
+  if (filters.devices.dept) list = list.filter(d => d.dept === filters.devices.dept);
+
+  const active = list.filter(d => d.technical_status !== 'جار تكهينه');
+  const retired = list.filter(d => d.technical_status === 'جار تكهينه');
+
+  const grid = document.getElementById('devices-grid');
+  if (!list.length) { grid.innerHTML = '<div class="empty"><div class="empty-icon">⚙️</div><div class="empty-text">لا توجد أجهزة</div></div>'; return; }
+
+  // Group active by dept
+  const byDept = {};
+  active.forEach(d => { if (!byDept[d.dept||'غير محدد']) byDept[d.dept||'غير محدد'] = []; byDept[d.dept||'غير محدد'].push(d); });
+
+  let html = '';
+  const order = [...DEPT_LIST, 'غير محدد'];
+  order.forEach(dept => {
+    if (!byDept[dept]?.length) return;
+    html += `<div style="grid-column:1/-1;background:var(--primary);color:#fff;padding:9px 14px;border-radius:var(--radius-sm);font-weight:700;font-size:13px;margin-top:6px">${dept} <span style="opacity:.8;font-size:12px">${byDept[dept].length} جهاز</span></div>`;
+    html += byDept[dept].map(d => deviceCard(d)).join('');
+  });
+
+  if (retired.length) {
+    html += `<div style="grid-column:1/-1;background:#64748b;color:#fff;padding:9px 14px;border-radius:var(--radius-sm);font-weight:700;font-size:13px;margin-top:14px">🗄 الأجهزة المكهنة <span style="opacity:.8;font-size:12px">${retired.length} جهاز</span></div>`;
+    html += retired.map(d => deviceCard(d, true)).join('');
+  }
+
+  grid.innerHTML = html;
+  attachSel('devices');
+}
+
+function deviceCard(d, retired=false) {
+  const brokenCount = state.maintenance.filter(r => r.device_name === d.name && r.device_status !== 'يعمل بحالة جيدة').length;
+  return `<div class="device-card${retired ? '" style="opacity:.7;border-style:dashed' : ''}" 
+    data-id="${d.id}" data-sel="devices"
+    draggable="true"
+    ondragstart="dragStart(event)"
+    ondragover="dragOver(event)"
+    ondrop="dragDrop(event)"
+    ondragleave="this.style.borderColor='';this.style.background=''"
+    style="cursor:default">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="color:var(--muted-color);font-size:18px;cursor:grab" draggable="false">⠿</span>
+        <div>
+          <div class="device-name">${d.name||'-'}</div>
+          <div class="device-brand">${[d.brand,d.model].filter(Boolean).join(' — ')||'-'}</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:4px">
+        <button class="btn btn-ghost btn-sm" onclick="openModal('modal-device','${d.id}')">✏️</button>
+        <button class="btn btn-ghost btn-sm" onclick="duplicateDevice('${d.id}')" title="نسخ">📋</button>
+        <button class="btn btn-danger btn-sm" onclick="delDevice('${d.id}')">🗑</button>
+      </div>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px">
+      ${statusBadge(d.technical_status)}
+      ${d.dept ? badge('blue', '📍 ' + d.dept) : ''}
+      ${brokenCount > 0 ? badge('red', '⚠️ ' + brokenCount + ' عطل مفتوح') : ''}
+      ${d.warranty_status ? badge('yellow', d.warranty_status) : ''}
+    </div>
+    <div class="device-info">
+      <div><div class="di-label">الرقم المسلسل</div><div class="di-val">${d.serial||'-'}</div></div>
+      <div><div class="di-label">سنة التوريد</div><div class="di-val">${d.year||'-'}</div></div>
+      <div><div class="di-label">الشركة الموردة</div><div class="di-val">${d.supplier||'-'}</div></div>
+      <div><div class="di-label">السعر</div><div class="di-val">${d.price ? Number(d.price).toLocaleString('ar-EG')+' ج' : '-'}</div></div>
+    </div>
+    ${d.notes ? `<div style="font-size:12px;color:var(--muted-color);border-top:1px solid var(--border);padding-top:8px">${d.notes}</div>` : ''}
+  </div>`;
+}
+
+function filterDevices(v) { filters.devices.search = v; renderDevices(); }
+function filterDeviceDept(v) { filters.devices.dept = v; renderDevices(); }
+
+async function delDevice(id) {
+  if (!confirm('حذف هذا الجهاز؟')) return;
+  await dbDelete('devices', id);
+  showToast('تم الحذف', 'error');
+  await loadDevices();
+}
+
+// Drag & Drop
+let dragId = null;
+function dragStart(e) { 
+  dragId = e.currentTarget.dataset.id; 
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/plain', dragId);
+  setTimeout(() => { e.currentTarget.style.opacity = '.5'; }, 0);
+}
+function dragOver(e) { 
+  e.preventDefault(); 
+  e.dataTransfer.dropEffect = 'move';
+  e.currentTarget.style.borderColor = 'var(--primary)'; 
+  e.currentTarget.style.background = 'var(--primary-light)';
+}
+async function dragDrop(e) {
+  e.preventDefault();
+  const targetId = e.currentTarget.dataset.id;
+  e.currentTarget.style.borderColor = '';
+  e.currentTarget.style.background = '';
+  if (dragId === targetId) return;
+  const si = state.devices.findIndex(d => d.id === dragId);
+  const ti = state.devices.findIndex(d => d.id === targetId);
+  if (si === -1 || ti === -1) return;
+  const [moved] = state.devices.splice(si, 1);
+  state.devices.splice(ti, 0, moved);
+  await Promise.all(state.devices.map((d,i) => dbUpdate('devices', d.id, { sort_order: i+1 })));
+  renderDevices();
+  showToast('تم تحديث الترتيب ✓');
+}
+
+// ============================================================
+// DASHBOARD
+// ============================================================
+async function loadDashboard() {
+  const [maint, rounds, devices] = await Promise.all([dbGet('maintenance'), dbGet('rounds'), dbGetDevices()]);
+  state.maintenance = maint; state.rounds = rounds; state.devices = devices;
+
+  const broken = maint.filter(r => r.device_status !== 'يعمل بحالة جيدة').length;
+  const thisMonth = new Date().toISOString().substr(0,7);
+  const fixed = maint.filter(r => r.repair_date && r.repair_date.startsWith(thisMonth)).length;
+  const todayR = rounds.filter(r => r.date === today());
+  const activeDevices = devices.filter(d => d.technical_status !== 'جار تكهينه');
+
+  document.getElementById('stat-total').textContent = activeDevices.length;
+  document.getElementById('stat-broken').textContent = broken;
+  document.getElementById('stat-fixed').textContent = fixed;
+  document.getElementById('stat-rounds-today').textContent = todayR.length;
+  document.getElementById('badge-maint').textContent = broken;
+  updateHdrStats();
+
+  // Recent maint
+  const dm = document.getElementById('dash-maint');
+  if (!maint.length) { dm.innerHTML = '<div class="empty"><div class="empty-icon">📭</div><div class="empty-text">لا يوجد بلاغات</div></div>'; }
+  else {
+    dm.innerHTML = '<div style="padding:0 18px">' + maint.slice(0,5).map(r => `
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid var(--border)">
+        <div>
+          <div style="font-size:14px;font-weight:700">${r.device_name||'-'}</div>
+          <div style="font-size:12px;color:var(--muted-color)">${r.type||''} — ${r.dept||''}</div>
+        </div>
+        ${statusBadge(r.device_status)}
+      </div>`).join('') + '</div>';
+  }
+
+  // Today rounds
+  const dr = document.getElementById('dash-rounds');
+  const total = activeDevices.length || 1;
+  const pct = Math.min(100, Math.round(todayR.length/total*100));
+  if (!todayR.length) { dr.innerHTML = '<div class="empty"><div class="empty-icon">📭</div><div class="empty-text">لا يوجد مرور اليوم</div></div>'; }
+  else {
+    dr.innerHTML = `<div style="padding:11px 18px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between">
+        <span style="font-size:13px;color:var(--muted-color)">${todayR.length} من ${total} جهاز</span>
+        <span style="font-weight:900;color:var(--primary)">${pct}%</span>
+      </div>
+      <div style="padding:0 18px">` +
+      todayR.slice(0,5).map(r => `
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid var(--border)">
+          <div style="font-size:14px;font-weight:700">${r.device_name||'-'}</div>
+          ${statusBadge(r.status)}
+        </div>`).join('') + '</div>';
+  }
+}
+
+function updateHdrStats() {
+  const active = state.devices.filter(d => d.technical_status !== 'جار تكهينه');
+  document.getElementById('hdr-devices').textContent = active.length || '-';
+  document.getElementById('hdr-broken').textContent = state.maintenance.filter(r => r.device_status !== 'يعمل بحالة جيدة').length || '0';
+  document.getElementById('hdr-rounds').textContent = state.rounds.filter(r => r.date === today()).length || '0';
+  document.getElementById('last-sync').textContent = 'آخر تحديث: ' + new Date().toLocaleTimeString('ar-EG');
+}
+
+// ============================================================
+// SELECTION SYSTEM (Long Press)
+// ============================================================
+let lpTimer = null;
+let isSelMode = { maint:false, rounds:false, invoices:false, devices:false };
+
+function attachSel(section) {
+  const selector = `[data-sel="${section}"]`;
+  document.querySelectorAll(selector).forEach(el => {
+    if (el._selAttached) return;
+    el._selAttached = true;
+    const id = el.dataset.id;
+
+    const start = () => {
+      lpTimer = setTimeout(() => {
+        lpTimer = null;
+        if (!isSelMode[section]) { isSelMode[section] = true; if (navigator.vibrate) navigator.vibrate(60); }
+        toggle(el, id, section);
+      }, 800);
+    };
+    const end = () => { clearTimeout(lpTimer); };
+    const click = (e) => {
+      if (!isSelMode[section]) return;
+      e.stopPropagation();
+      toggle(el, id, section);
+    };
+
+    el.addEventListener('mousedown', start);
+    el.addEventListener('mouseup', end);
+    el.addEventListener('mouseleave', end);
+    el.addEventListener('touchstart', start, { passive:true });
+    el.addEventListener('touchend', end);
+    el.addEventListener('touchcancel', end);
+    el.addEventListener('click', click);
+    el.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+      if (!isSelMode[section]) { isSelMode[section] = true; if (navigator.vibrate) navigator.vibrate(60); }
+      toggle(el, id, section);
+    });
+  });
+}
+
+function toggle(el, id, section) {
+  if (sel[section].has(id)) { sel[section].delete(id); el.classList.remove('selected'); }
+  else { sel[section].add(id); el.classList.add('selected'); }
+  if (sel[section].size === 0) isSelMode[section] = false;
+  updateBulkBar(section);
+}
+
+function updateBulkBar(section) {
+  const count = sel[section].size;
+  const barMap = { maint:'bulk-bar-maint', rounds:'bulk-bar-rounds', invoices:'bulk-bar-invoices', devices:'bulk-bar-devices' };
+  const countMap = { maint:'bulk-maint-count', rounds:'bulk-rounds-count', invoices:'bulk-inv-count', devices:'bulk-dev-count' };
+  const bar = document.getElementById(barMap[section]);
+  const cnt = document.getElementById(countMap[section]);
+  if (bar) { bar.style.display = count > 0 ? 'flex' : 'none'; }
+  if (cnt) cnt.textContent = count + ' محدد';
+}
+
+function cancelSel(section) {
+  sel[section].clear();
+  isSelMode[section] = false;
+  document.querySelectorAll(`[data-sel="${section}"].selected`).forEach(el => el.classList.remove('selected'));
+  updateBulkBar(section);
+}
+
+async function bulkDel(section) {
+  const ids = [...sel[section]];
+  if (!ids.length) return;
+  if (!confirm(`حذف ${ids.length} عنصر؟`)) return;
+  const tableMap = { maint:'maintenance', rounds:'rounds', invoices:'invoices', devices:'devices' };
+  try {
+    await Promise.all(ids.map(id => dbDelete(tableMap[section], id)));
+    showToast(`تم حذف ${ids.length} عنصر ✓`);
+    cancelSel(section);
+    if (section === 'maint') { await loadMaint(); updateHdrStats(); }
+    else if (section === 'rounds') await loadRounds();
+    else if (section === 'invoices') await loadInvoices();
+    else if (section === 'devices') { await loadDevices(); updateHdrStats(); }
+  } catch(e) { showToast('حدث خطأ', 'error'); }
+}
+
+document.addEventListener('click', (e) => {
+  ['maint','rounds','invoices','devices'].forEach(section => {
+    if (!isSelMode[section]) return;
+    const barId = { maint:'bulk-bar-maint', rounds:'bulk-bar-rounds', invoices:'bulk-bar-invoices', devices:'bulk-bar-devices' }[section];
+    if (!e.target.closest(`[data-sel="${section}"]`) && !e.target.closest(`#${barId}`)) {
+      cancelSel(section);
+    }
+  });
+});
+
+// ============================================================
+// PRINT
+// ============================================================
+const ORG = `<div class="p-org"><div>الهيئة العامة للتأمين الصحي فرع دمياط</div><div>مستشفى الهلال</div><div>قسم الهندسة الطبية</div></div>`;
+
+function setPrintHeader(title) {
+  document.getElementById('p-title').textContent = title;
+  document.getElementById('p-date').textContent = 'تاريخ الطباعة: ' + new Date().toLocaleDateString('ar-EG', {day:'numeric',month:'long',year:'numeric'});
+}
+
+function getSigs(type) {
+  const isTalaba = currentFacility === 'talaba';
+  const director = isTalaba ? 'مدير العيادة' : 'مدير المستشفى';
+  if (type === 'maint') return ['صيانة الأجهزة الطبية', director];
+  if (type === 'rounds') return ['مسؤولو الأقسام', 'صيانة الأجهزة الطبية', director];
+  if (type === 'invoices') return ['صيانة الأجهزة الطبية', director];
+  return [];
+}
+
+function setSigs(sigs) {
+  document.getElementById('p-sigs').innerHTML = `<div class="p-sigs">${sigs.map(s => `<div class="p-sig"><div class="p-sig-title">${s}</div></div>`).join('')}</div>`;
+}
+
+function openMaintPrint() {
+  const c = document.getElementById('maint-print-card');
+  c.style.display = 'block';
+  const from = new Date(); from.setDate(from.getDate()-30);
+  document.getElementById('maint-from').value = from.toISOString().split('T')[0];
+  document.getElementById('maint-to').value = today();
+  c.scrollIntoView({ behavior:'smooth' });
+}
+
+function printMaint() {
+  const from = document.getElementById('maint-from').value;
+  const to = document.getElementById('maint-to').value;
+  if (!from||!to) return showToast('اختر التاريخ','error');
+
+  const list = state.maintenance.filter(r => {
+    const d = (r.report_date || r.created_at||'').split('T')[0];
+    return d >= from && d <= to;
+  });
+
+  const fl = new Date(from).toLocaleDateString('ar-EG',{day:'numeric',month:'long',year:'numeric'});
+  const tl = new Date(to).toLocaleDateString('ar-EG',{day:'numeric',month:'long',year:'numeric'});
+
+  setPrintHeader(`تقرير سجل الصيانات والأعطال — ${fl} إلى ${tl}`);
+  document.getElementById('p-content').innerHTML = `<table class="p-table">
+    <thead><tr><th>#</th><th>نوع الصيانة</th><th>الجهاز</th><th>القسم</th><th>الإجراء المتخذ</th><th>الحالة</th><th>تاريخ العطل</th><th>تاريخ الإصلاح</th></tr></thead>
+    <tbody>${list.map((r,i) => `<tr>
+      <td>${i+1}</td><td>${r.type||'-'}</td><td><strong>${r.device_name||'-'}</strong></td><td>${r.dept||'-'}</td>
+      <td>${r.action_taken||'-'}</td><td>${r.device_status||'-'}</td>
+      <td>${fmtDate(r.report_date||r.created_at)}</td><td>${r.repair_date ? fmtDate(r.repair_date) : '-'}</td>
+    </tr>`).join('')}</tbody>
+  </table>`;
+  setSigs(getSigs('maint'));
+  window.print();
+}
+
+function openRoundsPrint() {
+  const c = document.getElementById('rounds-print-card');
+  c.style.display = 'block';
+  const from = new Date(); from.setDate(from.getDate()-6);
+  document.getElementById('rounds-from').value = from.toISOString().split('T')[0];
+  document.getElementById('rounds-to').value = today();
+  c.scrollIntoView({ behavior:'smooth' });
+}
+
+function printRounds() {
+  const from = document.getElementById('rounds-from').value;
+  const to = document.getElementById('rounds-to').value;
+  if (!from||!to) return showToast('اختر التاريخ','error');
+
+  const days = [];
+  let cur = new Date(from); const end = new Date(to);
+  while (cur <= end) { days.push(cur.toISOString().split('T')[0]); cur.setDate(cur.getDate()+1); }
+  if (days.length > 31) return showToast('الفترة أكبر من شهر','error');
+
+  const dayLabels = days.map(d => new Date(d).toLocaleDateString('ar-EG',{day:'numeric',month:'numeric'}));
+  const list = state.rounds.filter(r => r.date >= from && r.date <= to);
+
+  const byDept = {};
+  state.devices.filter(d => d.technical_status !== 'جار تكهينه').forEach(d => {
+    if (!byDept[d.dept]) byDept[d.dept] = [];
+    byDept[d.dept].push(d);
+  });
+
+  let tbl = `<table class="p-week-table"><thead><tr>
+    <th style="text-align:right">القسم</th>
+    <th style="text-align:right">الجهاز</th>
+    ${dayLabels.map(d => `<th>${d}</th>`).join('')}
+    <th style="text-align:right">ملاحظات</th>
+  </tr></thead><tbody>`;
+
+  DEPT_LIST.forEach(dept => {
+    if (!byDept[dept]?.length) return;
+    byDept[dept].forEach((device, idx) => {
+      tbl += `<tr>
+        <td class="dev-name">${idx === 0 ? dept : ''}</td>
+        <td class="dev-name">${device.name}${device.brand ? '<br><span style="color:#888;font-size:7px">'+device.brand+'</span>' : ''}</td>`;
+      days.forEach(day => {
+        const r = list.find(r => r.device_name === device.name && r.date === day);
+        if (!r) tbl += `<td style="color:#ddd">—</td>`;
+        else if (r.status === 'يعمل بحالة جيدة') tbl += `<td class="chk-good">✓</td>`;
+        else tbl += `<td class="chk-bad">✗</td>`;
+      });
+      const lastNote = list.filter(r => r.device_name === device.name && r.notes).pop();
+      tbl += `<td class="dev-name">${lastNote?.notes||''}</td></tr>`;
+    });
+  });
+
+  tbl += `</tbody></table><div class="p-legend">✓ = يعمل بحالة جيدة &nbsp; ✗ = معطل &nbsp; — = لم يتم التسجيل</div>`;
+
+  const fl = new Date(from).toLocaleDateString('ar-EG',{day:'numeric',month:'long',year:'numeric'});
+  const tl = new Date(to).toLocaleDateString('ar-EG',{day:'numeric',month:'long',year:'numeric'});
+  setPrintHeader(`تقرير المرور اليومي — ${fl} إلى ${tl}`);
+  document.getElementById('p-content').innerHTML = tbl;
+  setSigs(getSigs('rounds'));
+  window.print();
+}
+
+function printInvoices() {
+  const list = state.invoices;
+  setPrintHeader('تقرير متابعة الفواتير والشركات');
+  document.getElementById('p-content').innerHTML = `<table class="p-table">
+    <thead><tr><th>#</th><th>اسم الشركة</th><th>رقم الفاتورة</th><th>بيان الفاتورة</th><th>القيمة</th><th>الحالة</th><th>التاريخ</th></tr></thead>
+    <tbody>${list.map((r,i) => `<tr>
+      <td>${i+1}</td><td>${r.company_name||'-'}</td><td>${r.invoice_number||'-'}</td>
+      <td>${r.invoice_details||'-'}</td><td>${r.amount||'-'}</td><td>${r.invoice_status||'-'}</td>
+      <td>${fmtDate(r.invoice_date||r.created_at)}</td>
+    </tr>`).join('')}</tbody>
+  </table>`;
+  setSigs(getSigs('invoices'));
+  window.print();
+}
+
+function printDevices() {
+  const byDept = {};
+  state.devices.filter(d => d.technical_status !== 'جار تكهينه').forEach(d => {
+    if (!byDept[d.dept||'غير محدد']) byDept[d.dept||'غير محدد'] = [];
+    byDept[d.dept||'غير محدد'].push(d);
+  });
+
+  let html = '';
+  const order = [...DEPT_LIST, 'غير محدد'];
+  order.forEach(dept => {
+    if (!byDept[dept]?.length) return;
+    html += `<div style="background:#1a56db;color:#fff;padding:5px 10px;font-weight:700;font-size:10px;margin-bottom:0;-webkit-print-color-adjust:exact;print-color-adjust:exact">${dept}</div>`;
+    html += `<table class="p-table" style="margin-bottom:12px"><thead><tr>
+      <th>#</th><th>اسم الجهاز</th><th>الماركة</th><th>الموديل</th><th>الرقم المسلسل</th><th>سنة التوريد</th><th>السعر</th><th>الشركة الموردة</th><th>الضمان/الصيانة</th><th>الحالة</th>
+    </tr></thead><tbody>
+      ${byDept[dept].map((d,i) => `<tr>
+        <td>${i+1}</td><td><strong>${d.name||'-'}</strong></td><td>${d.brand||'-'}</td><td>${d.model||'-'}</td>
+        <td>${d.serial||'-'}</td><td>${d.year||'-'}</td>
+        <td>${d.price ? Number(d.price).toLocaleString('ar-EG')+' ج' : '-'}</td>
+        <td>${d.supplier||'-'}</td><td>${d.warranty_status||'-'}</td><td>${d.technical_status||'-'}</td>
+      </tr>`).join('')}
+    </tbody></table>`;
+  });
+
+  const retired = state.devices.filter(d => d.technical_status === 'جار تكهينه');
+  if (retired.length) {
+    html += `<div style="background:#64748b;color:#fff;padding:5px 10px;font-weight:700;font-size:10px;margin-bottom:0;-webkit-print-color-adjust:exact;print-color-adjust:exact">🗄 الأجهزة المكهنة</div>`;
+    html += `<table class="p-table" style="margin-bottom:12px"><thead><tr>
+      <th>#</th><th>اسم الجهاز</th><th>الماركة</th><th>الموديل</th><th>الرقم المسلسل</th><th>سنة التوريد</th><th>السعر</th><th>الشركة الموردة</th><th>الضمان/الصيانة</th><th>القسم</th>
+    </tr></thead>
+    <tbody>${retired.map((d,i) => `<tr>
+      <td>${i+1}</td><td><strong>${d.name||'-'}</strong></td><td>${d.brand||'-'}</td><td>${d.model||'-'}</td>
+      <td>${d.serial||'-'}</td><td>${d.year||'-'}</td>
+      <td>${d.price ? Number(d.price).toLocaleString('ar-EG')+' ج' : '-'}</td>
+      <td>${d.supplier||'-'}</td><td>${d.warranty_status||'-'}</td><td>${d.dept||'-'}</td>
+    </tr>`).join('')}</tbody></table>`;
+  }
+
+  setPrintHeader('تقرير سجل الأجهزة الطبية');
+  document.getElementById('p-content').innerHTML = html;
+  document.getElementById('p-sigs').innerHTML = '';
+  window.print();
+}
+
+// ============================================================
+// DEPARTMENTS
+// ============================================================
+let DEPT_LIST = ['العمليات','التعقيم','العناية','الداخلي','الأشعة','المعمل'];
+
+async function loadDepts() {
+  try {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/departments?order=sort_order.asc,created_at.asc`, { headers: H });
+    if (!r.ok) return;
+    const data = await r.json();
+    if (Array.isArray(data) && data.length > 0) {
+      DEPT_LIST = data.map(d => d.name);
+      window._deptsData = data;
+    }
+  } catch(e) { console.log('Using default depts'); }
+  updateAllDeptSelects();
+}
+
+function updateAllDeptSelects() {
+  const selects = ['m-dept','r-dept','bulk-dept','d-dept'];
+  selects.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const cur = el.value;
+    el.innerHTML = DEPT_LIST.map(d => `<option value="${d}">${d}</option>`).join('');
+    if (cur && DEPT_LIST.includes(cur)) el.value = cur;
+  });
+
+  // Update filter selects
+  document.querySelectorAll('select.filter-sel').forEach(el => {
+    if (el.innerHTML.includes('كل الأقسام')) {
+      const cur = el.value;
+      el.innerHTML = '<option value="">كل الأقسام</option>' + DEPT_LIST.map(d => `<option value="${d}">${d}</option>`).join('');
+      if (cur) el.value = cur;
+    }
+  });
+}
+
+function manageDepts() {
+  const depts = window._deptsData || DEPT_LIST.map((n,i) => ({id:null, name:n, sort_order:i+1}));
+  
+  const modal = document.createElement('div');
+  modal.id = 'dept-modal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px';
+  modal.innerHTML = `<div style="background:#fff;border-radius:12px;padding:22px;width:100%;max-width:420px;box-shadow:0 10px 25px rgba(0,0,0,.1);max-height:80vh;overflow-y:auto">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <div style="font-size:16px;font-weight:900">🏢 إدارة الأقسام</div>
+      <button onclick="document.getElementById('dept-modal').remove()" style="background:none;border:none;font-size:18px;cursor:pointer;color:#64748b">✕</button>
+    </div>
+    <div id="dept-list-inner">
+      ${depts.map((d,i) => `<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;background:#f8fafc;padding:8px 12px;border-radius:8px;border:1px solid #e2e8f0">
+        <span style="color:#64748b;cursor:ns-resize;font-size:16px">⠿</span>
+        <span style="flex:1;font-size:14px;font-weight:600">${d.name}</span>
+        <button onclick="editDept('${d.id||''}','${d.name}')" style="background:#ebf3ff;color:#1a56db;border:none;padding:5px 10px;border-radius:6px;cursor:pointer;font-family:Cairo,sans-serif;font-size:12px;font-weight:700">تعديل</button>
+        <button onclick="deleteDept('${d.id||''}','${d.name}')" style="background:#fde8e8;color:#c81e1e;border:none;padding:5px 10px;border-radius:6px;cursor:pointer;font-family:Cairo,sans-serif;font-size:12px;font-weight:700">حذف</button>
+      </div>`).join('')}
+    </div>
+    <div style="display:flex;gap:8px;margin-top:14px;padding-top:14px;border-top:1px solid #e2e8f0">
+      <input type="text" id="new-dept-inp" placeholder="اسم القسم الجديد" style="flex:1;padding:9px 12px;border:1px solid #e2e8f0;border-radius:8px;font-family:Cairo,sans-serif;font-size:13px">
+      <button onclick="addDept()" style="background:#1a56db;color:#fff;border:none;padding:9px 16px;border-radius:8px;font-family:Cairo,sans-serif;font-weight:700;cursor:pointer">+ إضافة</button>
+    </div>
+  </div>`;
+  document.body.appendChild(modal);
+  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+}
+
+window.addDept = async function() {
+  const inp = document.getElementById('new-dept-inp');
+  const name = inp.value.trim();
+  if (!name) return;
+  try {
+    const maxOrder = (window._deptsData || []).reduce((m,d) => Math.max(m, d.sort_order||0), 0);
+    await fetch(`${SUPABASE_URL}/rest/v1/departments`, {
+      method: 'POST',
+      headers: { ...H, 'Prefer': 'return=representation' },
+      body: JSON.stringify({ name, sort_order: maxOrder + 1 })
+    });
+    await loadDepts();
+    document.getElementById('dept-modal')?.remove();
+    manageDepts();
+    showToast('تم إضافة القسم ✓');
+  } catch(e) { showToast('حدث خطأ', 'error'); }
+};
+
+window.deleteDept = async function(id, name) {
+  if (!confirm(`حذف قسم "${name}"؟`)) return;
+  try {
+    if (id) {
+      await fetch(`${SUPABASE_URL}/rest/v1/departments?id=eq.${id}`, { method: 'DELETE', headers: H });
+    }
+    await loadDepts();
+    document.getElementById('dept-modal')?.remove();
+    manageDepts();
+    showToast('تم الحذف', 'error');
+  } catch(e) { showToast('حدث خطأ', 'error'); }
+};
+
+window.editDept = async function(id, oldName) {
+  const newName = prompt('اسم القسم الجديد:', oldName);
+  if (!newName?.trim() || newName === oldName) return;
+  try {
+    if (id) {
+      await fetch(`${SUPABASE_URL}/rest/v1/departments?id=eq.${id}`, {
+        method: 'PATCH',
+        headers: { ...H, 'Prefer': 'return=representation' },
+        body: JSON.stringify({ name: newName.trim() })
+      });
+    }
+    await loadDepts();
+    document.getElementById('dept-modal')?.remove();
+    manageDepts();
+    showToast('تم التعديل ✓');
+  } catch(e) { showToast('حدث خطأ', 'error'); }
+};
+
+// ============================================================
+// INIT
+// ============================================================
+const savedFacility = localStorage.getItem('helal_facility');
+if (savedFacility && FACILITIES[savedFacility]) {
+  selectFacility(savedFacility);
+} else {
+  // Wait for facility selection
+}
+</script>
+</body>
+</html>
